@@ -39,6 +39,21 @@ export interface LearningKit {
   verifiedBy?: string;
 }
 
+export interface SavedLesson {
+  id: string;
+  title: string;
+  grade: string;
+  subject: string;
+  sourceLanguage: "Hindi";
+  targetLanguage: "Santhali";
+  createdAt: string;
+  updatedAt: string;
+  kit: LearningKit;
+  verificationStatus: "ai_generated" | "needs_review" | "verified";
+  verifiedAt?: string;
+  verifiedBy?: string;
+}
+
 export interface GenerateLessonRequest {
   lessonText: string;
   grade: string;

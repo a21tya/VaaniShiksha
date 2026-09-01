@@ -9,6 +9,7 @@ const NAV_ITEMS = [
   { label: "Home", href: "/" },
   { label: "Teacher Dashboard", href: "/teacher" },
   { label: "Create Lesson", href: "/create-lesson" },
+  { label: "Lesson Library", href: "/lessons" },
   { label: "Student Mode", href: "/student" },
 ];
 

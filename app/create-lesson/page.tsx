@@ -1,12 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import PageContainer from "@/components/PageContainer";
 import LanguageSelector from "@/components/LanguageSelector";
 import { LearningKit, GenerateLessonResponse } from "@/types/lesson";
+import {
+  getSavedLessonById,
+  saveLessonToLibrary,
+} from "@/lib/storage";
 
-export default function CreateLessonPage() {
+function CreateLessonForm() {
+  const searchParams = useSearchParams();
+  const lessonIdParam = searchParams.get("id");
+
+  const [currentLessonId, setCurrentLessonId] = useState<string | null>(lessonIdParam);
   const [title, setTitle] = useState("Plants Around Us (हमारे आसपास के पौधे)");
   const [grade, setGrade] = useState("Grade 2");
   const [subject, setSubject] = useState("Environmental Studies");
@@ -18,6 +27,7 @@ export default function CreateLessonPage() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [saveSuccessMessage, setSaveSuccessMessage] = useState<string | null>(null);
   
   // Learning Kit State
   const [learningKit, setLearningKit] = useState<LearningKit | null>(null);
@@ -31,10 +41,28 @@ export default function CreateLessonPage() {
   const [isCardFlipped, setIsCardFlipped] = useState(false);
   const [selectedQuizAnswers, setSelectedQuizAnswers] = useState<{ [qIdx: number]: string }>({});
 
+  // Load existing lesson from URL id parameter on mount
+  useEffect(() => {
+    if (lessonIdParam) {
+      const saved = getSavedLessonById(lessonIdParam);
+      if (saved) {
+        const timer = setTimeout(() => {
+          setCurrentLessonId(saved.id);
+          setTitle(saved.title);
+          setGrade(saved.grade);
+          setSubject(saved.subject);
+          setLearningKit(saved.kit);
+        }, 0);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [lessonIdParam]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setErrorMessage(null);
+    setSaveSuccessMessage(null);
     setIsEditing(false);
 
     try {
@@ -85,6 +113,7 @@ export default function CreateLessonPage() {
     if (!learningKit) return;
     setEditableKit(JSON.parse(JSON.stringify(learningKit)));
     setIsEditing(true);
+    setSaveSuccessMessage(null);
   };
 
   const handleCancelEditing = () => {
@@ -94,8 +123,14 @@ export default function CreateLessonPage() {
 
   const handleSaveEdits = () => {
     if (!editableKit) return;
-    setLearningKit(JSON.parse(JSON.stringify(editableKit)));
+    const kitToSave = JSON.parse(JSON.stringify(editableKit));
+    setLearningKit(kitToSave);
     setIsEditing(false);
+
+    // Sync to localStorage
+    const saved = saveLessonToLibrary(kitToSave, currentLessonId || undefined);
+    setCurrentLessonId(saved.id);
+    setSaveSuccessMessage("Edits saved to local Lesson Library!");
   };
 
   const handleApproveAndVerify = () => {
@@ -114,6 +149,19 @@ export default function CreateLessonPage() {
     setLearningKit(updatedKit);
     setEditableKit(null);
     setIsEditing(false);
+
+    // Sync to localStorage
+    const saved = saveLessonToLibrary(updatedKit, currentLessonId || undefined);
+    setCurrentLessonId(saved.id);
+    setSaveSuccessMessage("Approved & Verified! Saved to Lesson Library.");
+  };
+
+  const handleSaveToLibrary = () => {
+    const baseKit = editableKit || learningKit;
+    if (!baseKit) return;
+    const saved = saveLessonToLibrary(baseKit, currentLessonId || undefined);
+    setCurrentLessonId(saved.id);
+    setSaveSuccessMessage("Lesson successfully saved to Lesson Library!");
   };
 
   return (
@@ -121,11 +169,13 @@ export default function CreateLessonPage() {
       {/* Breadcrumb & Title */}
       <div>
         <div className="flex items-center gap-2 text-xs sm:text-sm text-slate-500 mb-2">
-          <Link href="/teacher" className="hover:text-amber-700">
-            Teacher Dashboard
+          <Link href="/lessons" className="hover:text-amber-700">
+            Lesson Library
           </Link>
           <span>/</span>
-          <span className="font-semibold text-slate-800">Create New Lesson</span>
+          <span className="font-semibold text-slate-800">
+            {currentLessonId ? "Edit Saved Lesson" : "Create New Lesson"}
+          </span>
         </div>
 
         <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
@@ -281,10 +331,10 @@ export default function CreateLessonPage() {
           </button>
 
           <Link
-            href="/teacher"
+            href="/lessons"
             className="text-xs sm:text-sm font-medium text-slate-600 hover:text-slate-900"
           >
-            Cancel & Return to Dashboard
+            View Lesson Library ➔
           </Link>
         </div>
 
@@ -304,6 +354,32 @@ export default function CreateLessonPage() {
       {learningKit && (
         <div id="generated-kit-section" className="flex flex-col gap-8 pt-4">
           
+          {/* Save Success Banner */}
+          {saveSuccessMessage && (
+            <div className="bg-emerald-50 border border-emerald-300 text-emerald-950 p-4 rounded-2xl flex items-center justify-between gap-3 text-xs sm:text-sm shadow-2xs">
+              <div className="flex items-center gap-2 font-bold text-emerald-900">
+                <span className="text-lg">🎉</span>
+                <span>{saveSuccessMessage}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                {currentLessonId && (
+                  <Link
+                    href={`/student?id=${currentLessonId}`}
+                    className="px-3.5 py-1.5 rounded-xl bg-emerald-700 text-white font-bold text-xs hover:bg-emerald-800"
+                  >
+                    🎒 Launch Student Mode
+                  </Link>
+                )}
+                <Link
+                  href="/lessons"
+                  className="px-3.5 py-1.5 rounded-xl bg-white border border-emerald-300 text-emerald-900 font-bold text-xs hover:bg-emerald-50"
+                >
+                  View Library
+                </Link>
+              </div>
+            </div>
+          )}
+
           {/* Educational Safety Banner */}
           <div className="bg-amber-50 border border-amber-200 text-amber-950 p-4 rounded-2xl flex items-center gap-3 text-xs sm:text-sm shadow-2xs">
             <div className="w-8 h-8 rounded-xl bg-amber-200 text-amber-900 font-bold flex items-center justify-center shrink-0">
@@ -323,7 +399,7 @@ export default function CreateLessonPage() {
           <div className="bg-white rounded-3xl border border-slate-200 p-6 md:p-8 shadow-sm space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-5">
               <div>
-                <div className="flex items-center gap-2 mb-2">
+                <div className="flex items-center gap-2 mb-2 flex-wrap">
                   <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-900 text-xs font-bold">
                     {learningKit.grade} • {learningKit.subject}
                   </span>
@@ -392,7 +468,7 @@ export default function CreateLessonPage() {
               </div>
             </div>
 
-            {/* Action Bar for Review, Edit, Save, and Approve */}
+            {/* Action Bar for Review, Edit, Save, Approve, and Save to Library */}
             <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="text-xs text-slate-700 flex items-center gap-2">
                 <span className="text-base">👩‍🏫</span>
@@ -405,13 +481,13 @@ export default function CreateLessonPage() {
                 </span>
               </div>
 
-              <div className="flex items-center gap-3 w-full sm:w-auto shrink-0 justify-end">
+              <div className="flex items-center gap-2.5 w-full sm:w-auto shrink-0 justify-end flex-wrap">
                 {isEditing ? (
                   <>
                     <button
                       type="button"
                       onClick={handleCancelEditing}
-                      className="px-4 py-2 text-xs font-semibold rounded-xl bg-slate-200 text-slate-800 hover:bg-slate-300 transition-colors"
+                      className="px-3.5 py-2 text-xs font-semibold rounded-xl bg-slate-200 text-slate-800 hover:bg-slate-300 transition-colors"
                     >
                       Cancel
                     </button>
@@ -425,13 +501,20 @@ export default function CreateLessonPage() {
                     <button
                       type="button"
                       onClick={handleApproveAndVerify}
-                      className="px-5 py-2 text-xs font-bold rounded-xl bg-emerald-700 text-white hover:bg-emerald-800 transition-colors shadow-xs"
+                      className="px-4 py-2 text-xs font-bold rounded-xl bg-emerald-700 text-white hover:bg-emerald-800 transition-colors shadow-xs"
                     >
                       ✅ Save & Approve
                     </button>
                   </>
                 ) : (
                   <>
+                    <button
+                      type="button"
+                      onClick={handleSaveToLibrary}
+                      className="px-4 py-2 text-xs font-bold rounded-xl bg-amber-100 border border-amber-300 text-amber-950 hover:bg-amber-200 transition-colors"
+                    >
+                      💾 Save to Library
+                    </button>
                     <button
                       type="button"
                       onClick={handleStartEditing}
@@ -442,10 +525,18 @@ export default function CreateLessonPage() {
                     <button
                       type="button"
                       onClick={handleApproveAndVerify}
-                      className="px-5 py-2 text-xs font-bold rounded-xl bg-emerald-700 text-white hover:bg-emerald-800 transition-colors shadow-xs"
+                      className="px-4 py-2 text-xs font-bold rounded-xl bg-emerald-700 text-white hover:bg-emerald-800 transition-colors shadow-xs"
                     >
                       {learningKit.verificationStatus === "verified" ? "Re-verify Kit" : "✅ Approve & Verify"}
                     </button>
+                    {currentLessonId && (
+                      <Link
+                        href={`/student?id=${currentLessonId}`}
+                        className="px-4 py-2 text-xs font-bold rounded-xl bg-emerald-100 text-emerald-950 border border-emerald-300 hover:bg-emerald-200 transition-colors"
+                      >
+                        🎒 Student Mode
+                      </Link>
+                    )}
                   </>
                 )}
               </div>
@@ -1028,5 +1119,17 @@ export default function CreateLessonPage() {
         </div>
       </div>
     </PageContainer>
+  );
+}
+
+export default function CreateLessonPage() {
+  return (
+    <Suspense fallback={
+      <PageContainer className="max-w-4xl mx-auto py-12 text-center text-slate-500">
+        Loading lesson editor...
+      </PageContainer>
+    }>
+      <CreateLessonForm />
+    </Suspense>
   );
 }

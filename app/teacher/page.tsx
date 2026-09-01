@@ -57,8 +57,14 @@ export default function TeacherDashboard() {
           </p>
         </div>
 
-        {/* Primary Action Button */}
-        <div>
+        {/* Primary Action Buttons */}
+        <div className="flex items-center gap-3">
+          <Link
+            href="/lessons"
+            className="px-5 py-3.5 rounded-xl bg-white border border-slate-300 text-slate-800 font-semibold text-sm sm:text-base hover:bg-slate-50 transition-all flex items-center justify-center gap-2 shrink-0 shadow-2xs"
+          >
+            <span>📚 Lesson Library</span>
+          </Link>
           <Link
             href="/create-lesson"
             className="px-6 py-3.5 rounded-xl bg-amber-600 text-white font-semibold text-sm sm:text-base shadow-xs hover:bg-amber-700 transition-all flex items-center justify-center gap-2 group shrink-0"
