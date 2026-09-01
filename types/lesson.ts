@@ -34,6 +34,9 @@ export interface LearningKit {
     confidence: "high" | "medium" | "low";
     reviewNotes: string;
   };
+  verificationStatus?: "ai_generated" | "needs_review" | "verified";
+  verifiedAt?: string;
+  verifiedBy?: string;
 }
 
 export interface GenerateLessonRequest {

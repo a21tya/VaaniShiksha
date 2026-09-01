@@ -313,6 +313,7 @@ Generate a complete, structured JSON response adhering strictly to the schema.
     }
 
     const learningKit: LearningKit = JSON.parse(responseText);
+    learningKit.verificationStatus = learningKit.quality.reviewRequired ? "needs_review" : "ai_generated";
 
     return NextResponse.json({
       success: true,
