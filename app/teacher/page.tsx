@@ -46,14 +46,14 @@ export default function TeacherDashboard() {
       {/* Top Header & Greeting Banner */}
       <div className="bg-white rounded-3xl border border-slate-200 p-6 md:p-8 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100/70 border border-amber-200 text-amber-900 text-xs font-semibold mb-2">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100/70 border border-amber-200 text-amber-950 text-xs sm:text-sm font-semibold mb-2">
             <span>👩‍🏫 Educator Hub • Primary Education</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
             Welcome, Teacher
           </h1>
-          <p className="text-sm text-slate-600 mt-1">
-            Manage your mother-tongue lesson kits, review translations, and adapt primary learning materials.
+          <p className="text-sm sm:text-base text-slate-600 mt-1">
+            Manage your mother-tongue lesson kits, review translations, and adapt primary learning materials for your classroom.
           </p>
         </div>
 
@@ -61,7 +61,7 @@ export default function TeacherDashboard() {
         <div>
           <Link
             href="/create-lesson"
-            className="px-6 py-3 rounded-xl bg-amber-600 text-white font-semibold text-sm shadow-xs hover:bg-amber-700 transition-all flex items-center justify-center gap-2 group shrink-0"
+            className="px-6 py-3.5 rounded-xl bg-amber-600 text-white font-semibold text-sm sm:text-base shadow-xs hover:bg-amber-700 transition-all flex items-center justify-center gap-2 group shrink-0"
           >
             <span className="text-lg leading-none">+</span>
             <span>Create New Lesson</span>
@@ -75,10 +75,10 @@ export default function TeacherDashboard() {
       {/* Dashboard Statistics */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <h2 className="text-base font-bold text-slate-900">
+          <h2 className="text-lg font-bold text-slate-900">
             Overview Metrics
           </h2>
-          <span className="text-xs font-semibold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200">
+          <span className="text-xs font-semibold text-amber-800 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200">
             Demonstration Metrics
           </span>
         </div>
@@ -112,17 +112,17 @@ export default function TeacherDashboard() {
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-bold text-slate-900">
+            <h2 className="text-lg sm:text-xl font-bold text-slate-900">
               Recent Demonstration Lessons
             </h2>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs sm:text-sm text-slate-600">
               Curriculum units ready for mother-tongue classroom learning
             </p>
           </div>
 
           <Link
             href="/create-lesson"
-            className="text-xs font-semibold text-amber-700 hover:text-amber-800 hover:underline"
+            className="text-xs sm:text-sm font-semibold text-amber-700 hover:text-amber-800 hover:underline"
           >
             + Add Another Lesson
           </Link>
@@ -137,24 +137,24 @@ export default function TeacherDashboard() {
       </div>
 
       {/* Teacher Guide Box */}
-      <div className="bg-slate-50 rounded-2xl border border-slate-200 p-5 text-xs text-slate-600 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="bg-slate-50 rounded-2xl border border-slate-200 p-5 text-xs sm:text-sm text-slate-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center font-bold text-base shrink-0">
+          <div className="w-9 h-9 rounded-xl bg-amber-100 text-amber-900 flex items-center justify-center font-bold text-lg shrink-0">
             💡
           </div>
           <div>
-            <p className="font-semibold text-slate-800">
+            <p className="font-semibold text-slate-900">
               How VaaniShiksha helps in your classroom:
             </p>
-            <p className="text-slate-500">
-              Enter standard textbook lesson text, generate Santhali vocabulary flashcards, and preview how students see the lesson.
+            <p className="text-slate-600 text-xs sm:text-sm">
+              Enter standard textbook lesson text, generate Santhali vocabulary flashcards, and preview how primary students see the lesson.
             </p>
           </div>
         </div>
 
         <Link
           href="/create-lesson"
-          className="px-4 py-2 text-xs font-semibold text-slate-800 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors shrink-0"
+          className="px-4 py-2 text-xs sm:text-sm font-semibold text-slate-900 bg-white border border-slate-300 rounded-xl hover:bg-slate-50 transition-colors shrink-0"
         >
           Try Lesson Creation ➔
         </Link>

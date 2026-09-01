@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
@@ -18,25 +19,25 @@ export default function Navbar() {
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-amber-100 shadow-xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center justify-between h-18 py-2">
           {/* Logo & Brand */}
           <div className="flex items-center gap-3">
             <Link
               href="/"
-              className="flex items-center gap-2.5 group focus:outline-hidden"
+              className="flex items-center gap-3 group focus:outline-hidden"
               aria-label="VaaniShiksha Home"
             >
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center text-white font-bold text-xl shadow-xs group-hover:scale-105 transition-transform">
-                V
-              </div>
-              <div className="flex flex-col">
-                <span className="text-xl font-bold text-slate-900 tracking-tight leading-none group-hover:text-amber-700 transition-colors">
-                  VaaniShiksha
-                </span>
-                <span className="text-[10px] font-semibold text-amber-700 uppercase tracking-widest mt-0.5">
-                  SIH26042 • Vernacular Pedagogy
-                </span>
-              </div>
+              <Image
+                src="/vaanishiksha-logo-cropped.jpeg"
+                alt="VaaniShiksha Logo"
+                width={180}
+                height={72}
+                className="h-9 sm:h-10 w-auto object-contain transition-transform group-hover:scale-102"
+                priority
+              />
+              <span className="hidden sm:inline-block text-[11px] font-semibold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200/70">
+                SIH26042
+              </span>
             </Link>
           </div>
 
@@ -52,10 +53,10 @@ export default function Navbar() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-150 ${
+                  className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-all duration-150 ${
                     isActive
-                      ? "bg-amber-100 text-amber-900 font-semibold shadow-2xs"
-                      : "text-slate-600 hover:text-slate-900 hover:bg-slate-100/80"
+                      ? "bg-amber-100 text-amber-950 font-semibold shadow-2xs"
+                      : "text-slate-700 hover:text-slate-900 hover:bg-slate-100/80"
                   }`}
                   aria-current={isActive ? "page" : undefined}
                 >
@@ -65,28 +66,28 @@ export default function Navbar() {
             })}
           </nav>
 
-          {/* Quick Header CTA */}
-          <div className="hidden md:flex items-center gap-2">
+          {/* Quick Header Access Buttons */}
+          <div className="hidden lg:flex items-center gap-2">
             <Link
               href="/teacher"
-              className="px-3.5 py-1.5 text-xs font-semibold text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-200/80 rounded-full transition-colors"
+              className="px-3.5 py-1.5 text-xs font-semibold text-amber-900 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-full transition-colors"
             >
               Teacher Access
             </Link>
             <Link
               href="/student"
-              className="px-3.5 py-1.5 text-xs font-semibold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/80 rounded-full transition-colors"
+              className="px-3.5 py-1.5 text-xs font-semibold text-emerald-900 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-full transition-colors"
             >
               Student Portal
             </Link>
           </div>
 
-          {/* Mobile Menu Button */}
+          {/* Mobile Menu Toggle Button */}
           <div className="flex md:hidden">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               type="button"
-              className="p-2 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500"
+              className="p-2 rounded-lg text-slate-700 hover:text-slate-900 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500"
               aria-controls="mobile-menu"
               aria-expanded={mobileMenuOpen}
               aria-label="Toggle Navigation Menu"
@@ -108,7 +109,7 @@ export default function Navbar() {
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
         <div className="md:hidden border-b border-amber-100 bg-white" id="mobile-menu">
-          <div className="px-4 pt-2 pb-4 space-y-1">
+          <div className="px-4 pt-2 pb-4 space-y-1.5">
             {NAV_ITEMS.map((item) => {
               const isActive =
                 item.href === "/"
@@ -122,8 +123,8 @@ export default function Navbar() {
                   onClick={() => setMobileMenuOpen(false)}
                   className={`block px-4 py-2.5 rounded-lg text-base font-medium transition-colors ${
                     isActive
-                      ? "bg-amber-100 text-amber-900 font-semibold"
-                      : "text-slate-700 hover:bg-slate-50"
+                      ? "bg-amber-100 text-amber-950 font-semibold"
+                      : "text-slate-800 hover:bg-slate-50"
                   }`}
                   aria-current={isActive ? "page" : undefined}
                 >

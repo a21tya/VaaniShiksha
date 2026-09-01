@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 export default function Footer() {
   return (
@@ -6,11 +7,16 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-7 h-7 rounded-lg bg-amber-500 flex items-center justify-center text-slate-950 font-bold text-sm">
-                V
+            <div className="flex items-center gap-3 mb-3">
+              <div className="bg-white p-1.5 rounded-lg inline-block">
+                <Image
+                  src="/vaanishiksha-logo-cropped.jpeg"
+                  alt="VaaniShiksha Logo"
+                  width={160}
+                  height={64}
+                  className="h-9 w-auto object-contain"
+                />
               </div>
-              <span className="text-lg font-bold text-white">VaaniShiksha</span>
             </div>
             <p className="text-xs text-slate-400 leading-relaxed max-w-sm">
               AI-Powered Vernacular Pedagogy and Real-Time Translation Tool for
@@ -54,7 +60,7 @@ export default function Footer() {
               <span className="font-medium">Primary Focus:</span>
               <span>Hindi → Santhali</span>
             </div>
-            <p className="text-[11px] text-slate-400 mt-2">
+            <p className="text-xs text-slate-400 mt-2.5 leading-relaxed">
               Designed for inclusive primary classrooms in India, empowering teachers and native speakers.
             </p>
           </div>

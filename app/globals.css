@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Ol+Chiki:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
 :root {
@@ -16,6 +17,11 @@ body {
   background-color: var(--background);
   color: var(--foreground);
   font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+}
+
+/* Custom Ol Chiki / Santhali font class for clear vernacular rendering */
+.font-santhali {
+  font-family: "Noto Sans Ol Chiki", "Ol Chiki", system-ui, -apple-system, sans-serif;
 }
 
 /* Custom focus styles for accessibility */
