@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import PageContainer from "@/components/PageContainer";
 import LanguageSelector from "@/components/LanguageSelector";
+import { LearningKit, GenerateLessonResponse } from "@/types/lesson";
 
 export default function CreateLessonPage() {
   const [title, setTitle] = useState("Plants Around Us (हमारे आसपास के पौधे)");
@@ -12,13 +13,63 @@ export default function CreateLessonPage() {
   const [sourceLang, setSourceLang] = useState("Hindi");
   const [targetLang, setTargetLang] = useState("Santhali");
   const [content, setContent] = useState(
-    "हमारे आसपास कई तरह के पौधे पाए जाते हैं। पौधों के मुख्य भाग हैं: जड़, तना, पत्ता और फूल। पौधे हमारे जीवन के लिए बहुत उपयोगी हैं।"
+    "हमारे आसपास कई प्रकार के पौधे पाए जाते हैं। पौधों के मुख्य भाग होते हैं: जड़, तना, पत्ता और फूल। पौधे हमें ताज़ी हवा और फल देते हैं।"
   );
-  const [submittedState, setSubmittedState] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [learningKit, setLearningKit] = useState<LearningKit | null>(null);
+
+  // Flashcard & Quiz Interactive States
+  const [activeCardIndex, setActiveCardIndex] = useState(0);
+  const [isCardFlipped, setIsCardFlipped] = useState(false);
+  const [selectedQuizAnswers, setSelectedQuizAnswers] = useState<{ [qIdx: number]: string }>({});
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmittedState(true);
+    setIsLoading(true);
+    setErrorMessage(null);
+
+    try {
+      const response = await fetch("/api/generate-lesson", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          lessonText: content,
+          grade,
+          subject,
+          targetLanguage: targetLang,
+        }),
+      });
+
+      const result: GenerateLessonResponse = await response.json();
+
+      if (!response.ok || !result.success) {
+        setErrorMessage(
+          result.success === false
+            ? result.error
+            : "An unexpected error occurred while generating the lesson kit."
+        );
+        return;
+      }
+
+      setLearningKit(result.data);
+      setActiveCardIndex(0);
+      setIsCardFlipped(false);
+      setSelectedQuizAnswers({});
+
+      // Scroll smoothly to result
+      setTimeout(() => {
+        document.getElementById("generated-kit-section")?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to communicate with server.";
+      setErrorMessage(`Network or server error: ${msg}`);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -37,7 +88,7 @@ export default function CreateLessonPage() {
           Create Mother-Tongue Lesson Kit
         </h1>
         <p className="text-sm sm:text-base text-slate-600 mt-1">
-          Provide standard textbook material in Hindi to generate Santhali pedagogical adaptations.
+          Provide standard textbook material in Hindi to generate Santhali pedagogical adaptations powered by Gemini 3.7 Flash.
         </p>
       </div>
 
@@ -129,7 +180,7 @@ export default function CreateLessonPage() {
               Source Lesson Content ({sourceLang}) <span className="text-amber-600">*</span>
             </label>
             <span className="text-xs text-slate-500">
-              Paste textbook paragraph or notes
+              Paste textbook paragraph or teacher notes
             </span>
           </div>
           <textarea
@@ -143,13 +194,46 @@ export default function CreateLessonPage() {
           />
         </div>
 
-        {/* Action Button */}
+        {/* Action Button & Loading Indicator */}
         <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4">
           <button
             type="submit"
-            className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-amber-600 text-white font-semibold text-sm sm:text-base shadow-xs hover:bg-amber-700 transition-all flex items-center justify-center gap-2 group"
+            disabled={isLoading}
+            className={`w-full sm:w-auto px-8 py-3.5 rounded-xl font-semibold text-sm sm:text-base shadow-xs transition-all flex items-center justify-center gap-2.5 ${
+              isLoading
+                ? "bg-amber-400 text-amber-950 cursor-wait"
+                : "bg-amber-600 text-white hover:bg-amber-700 active:scale-98"
+            }`}
           >
-            <span>✨ Generate Learning Kit</span>
+            {isLoading ? (
+              <>
+                <svg
+                  className="animate-spin h-5 w-5 text-amber-950"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  />
+                </svg>
+                <span>Generating Santhali Learning Kit...</span>
+              </>
+            ) : (
+              <>
+                <span>✨ Generate Learning Kit</span>
+              </>
+            )}
           </button>
 
           <Link
@@ -160,32 +244,315 @@ export default function CreateLessonPage() {
           </Link>
         </div>
 
-        {/* Phase Connection Notice */}
-        {submittedState && (
-          <div className="p-5 rounded-2xl bg-amber-50 border border-amber-300 text-amber-950 text-sm space-y-2">
-            <div className="flex items-center gap-2 font-bold text-amber-950">
-              <span className="text-lg">ℹ️</span>
-              <span>AI Generation Connection Notice</span>
+        {/* Error Notification Banner */}
+        {errorMessage && (
+          <div className="p-5 rounded-2xl bg-red-50 border border-red-200 text-red-950 text-sm space-y-2">
+            <div className="flex items-center gap-2 font-bold text-red-800">
+              <span className="text-lg">⚠️</span>
+              <span>Generation Error</span>
             </div>
-            <p className="leading-relaxed">
-              <strong>AI generation will be connected in the next development phase.</strong> In this prototype shell, no real AI API or fake response is executed.
-            </p>
-            <div className="pt-1">
-              <Link
-                href="/student"
-                className="inline-flex items-center gap-1 font-semibold text-amber-900 underline hover:text-amber-950"
-              >
-                View Demonstration Student Mode for &ldquo;Plants Around Us&rdquo; ➔
-              </Link>
-            </div>
+            <p className="leading-relaxed">{errorMessage}</p>
           </div>
         )}
       </form>
 
+      {/* Generated Learning Kit Display Section */}
+      {learningKit && (
+        <div id="generated-kit-section" className="flex flex-col gap-8 pt-4">
+          {/* Kit Header & Quality Card */}
+          <div className="bg-white rounded-3xl border border-slate-200 p-6 md:p-8 shadow-sm space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-5">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-900 text-xs font-bold">
+                    {learningKit.grade} • {learningKit.subject}
+                  </span>
+                  <span className="px-3 py-1 rounded-full bg-amber-100 text-amber-900 text-xs font-semibold">
+                    Hindi ➔ Santhali
+                  </span>
+                </div>
+                <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
+                  {learningKit.title}
+                </h2>
+              </div>
+
+              {/* Quality & Confidence Indicator */}
+              <div className="flex flex-col sm:items-end gap-1.5 shrink-0">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                    Confidence:
+                  </span>
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${
+                      learningKit.quality.confidence === "high"
+                        ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
+                        : learningKit.quality.confidence === "medium"
+                        ? "bg-amber-100 text-amber-800 border border-amber-300"
+                        : "bg-red-100 text-red-800 border border-red-300"
+                    }`}
+                  >
+                    {learningKit.quality.confidence}
+                  </span>
+                </div>
+                {learningKit.quality.reviewRequired && (
+                  <span className="text-[11px] font-semibold text-amber-800 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                    Teacher Review Recommended
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Quality Notes */}
+            {learningKit.quality.reviewNotes && (
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-700">
+                <span className="font-bold text-slate-900 block mb-1">
+                  🔍 Pedagogical & Linguistic Notes:
+                </span>
+                <p>{learningKit.quality.reviewNotes}</p>
+              </div>
+            )}
+          </div>
+
+          {/* Dual-Language Lesson Story Card */}
+          <section className="bg-white rounded-3xl border border-emerald-200 p-6 md:p-8 shadow-2xs space-y-6">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                <span>📖 Lesson Adaptation</span>
+              </h3>
+              <span className="text-xs font-semibold text-emerald-800 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+                Classroom Ready
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Hindi Source */}
+              <div className="p-5 rounded-2xl bg-amber-50/70 border border-amber-200 space-y-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-amber-900">
+                  Hindi (Source Curriculum)
+                </span>
+                <p className="font-medium text-slate-900 text-base sm:text-lg leading-relaxed">
+                  {learningKit.lesson.hindi}
+                </p>
+              </div>
+
+              {/* Santhali Adaptation */}
+              <div className="p-5 rounded-2xl bg-emerald-50/70 border border-emerald-200 space-y-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-emerald-900">
+                  Santhali Vernacular Adaptation (Ol Chiki)
+                </span>
+                <p className="font-santhali font-bold text-emerald-950 text-xl sm:text-2xl leading-relaxed">
+                  {learningKit.lesson.santhali}
+                </p>
+                <p className="text-xs sm:text-sm text-emerald-800 pt-1">
+                  <strong>Pronunciation:</strong> {learningKit.lesson.romanization}
+                </p>
+              </div>
+            </div>
+
+            {/* Concept Takeaway */}
+            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-sm text-slate-800">
+              <strong className="text-slate-900">💡 Key Concept Takeaway:</strong>{" "}
+              {learningKit.lesson.simpleExplanation}
+            </div>
+          </section>
+
+          {/* Vocabulary Section */}
+          <section className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xl font-bold text-slate-900">
+                Key Vocabulary Words
+              </h3>
+              <span className="text-xs font-semibold text-slate-500">
+                {learningKit.vocabulary.length} Terms Extracted
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              {learningKit.vocabulary.map((v, idx) => (
+                <div
+                  key={idx}
+                  className="bg-white p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-2 hover:border-amber-300 transition-colors"
+                >
+                  <div className="flex items-baseline justify-between">
+                    <span className="text-base font-bold text-slate-900">{v.hindi}</span>
+                    <span className="text-xs text-slate-500 font-medium">({v.romanization})</span>
+                  </div>
+                  <div className="font-santhali text-2xl font-bold text-emerald-800">
+                    {v.santhali}
+                  </div>
+                  <p className="text-xs text-slate-600 pt-1 border-t border-slate-100">
+                    {v.meaning}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* Interactive Flashcards */}
+          {learningKit.flashcards.length > 0 && (
+            <section className="bg-white rounded-3xl border border-slate-200 p-6 md:p-8 shadow-2xs space-y-6">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                  <span>📇 Interactive Flashcards</span>
+                </h3>
+                <span className="text-xs font-bold text-emerald-800 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+                  Card {activeCardIndex + 1} of {learningKit.flashcards.length}
+                </span>
+              </div>
+
+              {/* Flashcard Body */}
+              <div
+                onClick={() => setIsCardFlipped(!isCardFlipped)}
+                className="cursor-pointer min-h-[160px] p-8 rounded-3xl bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-300 flex flex-col items-center justify-center text-center space-y-3 transition-transform hover:scale-[1.01]"
+              >
+                <span className="text-xs font-bold uppercase tracking-widest text-amber-800">
+                  {isCardFlipped ? "Back (Answer / Vernacular)" : "Front (Click to Flip)"}
+                </span>
+                <p className="text-xl sm:text-2xl font-extrabold text-slate-900">
+                  {isCardFlipped
+                    ? learningKit.flashcards[activeCardIndex].back
+                    : learningKit.flashcards[activeCardIndex].front}
+                </p>
+                <span className="text-xs text-amber-700 italic">
+                  {isCardFlipped ? "Click to see question" : "Click to reveal translation"}
+                </span>
+              </div>
+
+              {/* Controls */}
+              <div className="flex items-center justify-center gap-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveCardIndex(
+                      (prev) => (prev - 1 + learningKit.flashcards.length) % learningKit.flashcards.length
+                    );
+                    setIsCardFlipped(false);
+                  }}
+                  className="px-4 py-2 text-xs font-bold rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200"
+                >
+                  ◀ Previous
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsCardFlipped(!isCardFlipped)}
+                  className="px-5 py-2 text-xs font-bold rounded-xl bg-amber-600 text-white hover:bg-amber-700 shadow-2xs"
+                >
+                  🔄 Flip Card
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveCardIndex((prev) => (prev + 1) % learningKit.flashcards.length);
+                    setIsCardFlipped(false);
+                  }}
+                  className="px-4 py-2 text-xs font-bold rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200"
+                >
+                  Next ▶
+                </button>
+              </div>
+            </section>
+          )}
+
+          {/* Quiz Section */}
+          {learningKit.quiz.length > 0 && (
+            <section className="bg-white rounded-3xl border border-slate-200 p-6 md:p-8 shadow-2xs space-y-6">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                  <span>📝 Classroom Comprehension Quiz</span>
+                </h3>
+                <span className="text-xs font-semibold text-slate-500">
+                  {learningKit.quiz.length} Questions
+                </span>
+              </div>
+
+              <div className="space-y-6">
+                {learningKit.quiz.map((q, qIdx) => {
+                  const selectedAnswer = selectedQuizAnswers[qIdx];
+
+                  return (
+                    <div key={qIdx} className="space-y-3">
+                      <p className="text-sm sm:text-base font-bold text-slate-900">
+                        {qIdx + 1}. {q.question}
+                      </p>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        {q.options.map((opt, optIdx) => {
+                          const isSelected = selectedAnswer === opt;
+                          const isCorrect = opt === q.correctAnswer;
+                          const showResult = Boolean(selectedAnswer);
+
+                          let buttonStyle = "bg-slate-50 border-slate-200 hover:bg-slate-100 text-slate-800";
+                          if (showResult) {
+                            if (isCorrect) {
+                              buttonStyle = "bg-emerald-100 border-emerald-400 text-emerald-950 font-bold";
+                            } else if (isSelected && !isCorrect) {
+                              buttonStyle = "bg-red-100 border-red-400 text-red-950 font-bold";
+                            }
+                          }
+
+                          return (
+                            <button
+                              key={optIdx}
+                              type="button"
+                              onClick={() => {
+                                setSelectedQuizAnswers((prev) => ({
+                                  ...prev,
+                                  [qIdx]: opt,
+                                }));
+                              }}
+                              className={`p-3 rounded-xl border text-left text-xs sm:text-sm transition-all ${buttonStyle}`}
+                            >
+                              {opt}
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {selectedAnswer && (
+                        <p className="text-xs font-semibold mt-1">
+                          {selectedAnswer === q.correctAnswer ? (
+                            <span className="text-emerald-700">✅ Correct answer!</span>
+                          ) : (
+                            <span className="text-red-600">
+                              ❌ Incorrect. Correct answer: {q.correctAnswer}
+                            </span>
+                          )}
+                        </p>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+          )}
+
+          {/* Activity Section */}
+          <section className="bg-gradient-to-r from-amber-600 to-orange-600 rounded-3xl p-6 md:p-8 text-white shadow-sm space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-xs flex items-center justify-center text-3xl shrink-0">
+                🎨
+              </div>
+              <div>
+                <span className="text-xs font-bold uppercase tracking-wider text-amber-100">
+                  Recommended Classroom Activity
+                </span>
+                <h3 className="text-xl sm:text-2xl font-bold text-white">
+                  {learningKit.activity.title}
+                </h3>
+              </div>
+            </div>
+
+            <p className="text-sm sm:text-base text-amber-50 leading-relaxed whitespace-pre-line">
+              {learningKit.activity.instructions}
+            </p>
+          </section>
+        </div>
+      )}
+
       {/* System Explanation Section */}
       <div className="bg-white rounded-3xl border border-slate-200 p-6 md:p-8 space-y-4 shadow-2xs">
         <h3 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
-          <span>🧠 What the eventual VaaniShiksha AI Engine will do</span>
+          <span>🧠 How the VaaniShiksha AI Engine operates</span>
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs sm:text-sm text-slate-700">
           <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 space-y-1.5">
