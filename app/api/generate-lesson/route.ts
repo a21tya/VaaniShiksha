@@ -2,9 +2,37 @@ import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenAI, Type } from "@google/genai";
 import { LearningKit, GenerateLessonResponse } from "@/types/lesson";
 
+// --- Constants ---
 const MAX_RETRIES = 3;
 const INITIAL_DELAY_MS = 1000;
+const MAX_LESSON_TEXT_LENGTH = 5000;
+const GEMINI_TIMEOUT_MS = 90_000; // 90 seconds hard timeout
 
+// --- Simple in-memory rate limiter (H4) ---
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+const RATE_LIMIT_WINDOW_MS = 60_000; // 1 minute
+const RATE_LIMIT_MAX_REQUESTS = 5; // 5 requests per minute per IP
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const entry = rateLimitMap.get(ip);
+
+  if (!entry || now > entry.resetAt) {
+    rateLimitMap.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+    return false;
+  }
+
+  entry.count++;
+  return entry.count > RATE_LIMIT_MAX_REQUESTS;
+}
+
+// --- Ol Chiki Unicode presence check (M1) ---
+const OL_CHIKI_REGEX = /[\u1C50-\u1C7F]/;
+function containsOlChiki(text: string): boolean {
+  return OL_CHIKI_REGEX.test(text);
+}
+
+// --- Helpers ---
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -52,8 +80,157 @@ function isTransientGeminiError(error: unknown): boolean {
   return false;
 }
 
+// --- Semantic validation of Gemini output (C1, H2, M1) ---
+interface ValidationResult {
+  valid: boolean;
+  warnings: string[];
+  kit: LearningKit;
+}
+
+function validateAndRepairLearningKit(raw: Record<string, unknown>): ValidationResult {
+  const warnings: string[] = [];
+  const kit = raw as unknown as LearningKit;
+
+  // Required top-level string fields
+  for (const field of ["title", "grade", "subject"] as const) {
+    if (!kit[field] || typeof kit[field] !== "string" || !kit[field].trim()) {
+      warnings.push(`Missing or empty required field: '${field}'`);
+    }
+  }
+
+  // Lesson object
+  if (!kit.lesson || typeof kit.lesson !== "object") {
+    return { valid: false, warnings: ["Missing 'lesson' object entirely"], kit };
+  }
+  for (const lf of ["hindi", "santhali", "romanization", "simpleExplanation"] as const) {
+    if (!kit.lesson[lf] || typeof kit.lesson[lf] !== "string" || !kit.lesson[lf].trim()) {
+      warnings.push(`Missing or empty lesson field: 'lesson.${lf}'`);
+    }
+  }
+
+  // Ol Chiki presence check (M1)
+  if (kit.lesson.santhali && !containsOlChiki(kit.lesson.santhali)) {
+    warnings.push("lesson.santhali does not contain Ol Chiki Unicode characters (U+1C50–U+1C7F)");
+  }
+
+  // Vocabulary array
+  if (!Array.isArray(kit.vocabulary) || kit.vocabulary.length === 0) {
+    warnings.push("Vocabulary array is missing or empty");
+  } else {
+    for (let i = 0; i < kit.vocabulary.length; i++) {
+      const v = kit.vocabulary[i];
+      if (!v.hindi || !v.santhali || !v.romanization || !v.meaning) {
+        warnings.push(`Vocabulary item [${i}] has missing fields`);
+      }
+      if (v.santhali && !containsOlChiki(v.santhali)) {
+        warnings.push(`Vocabulary item [${i}] santhali field lacks Ol Chiki characters`);
+      }
+    }
+  }
+
+  // Flashcards array
+  if (!Array.isArray(kit.flashcards) || kit.flashcards.length === 0) {
+    warnings.push("Flashcards array is missing or empty");
+  }
+
+  // Quiz array with correctAnswer validation (H2)
+  if (!Array.isArray(kit.quiz) || kit.quiz.length === 0) {
+    warnings.push("Quiz array is missing or empty");
+  } else {
+    for (let i = 0; i < kit.quiz.length; i++) {
+      const q = kit.quiz[i];
+
+      // Ensure options is an array with at least 2 items
+      if (!Array.isArray(q.options) || q.options.length < 2) {
+        warnings.push(`Quiz question [${i}] has fewer than 2 options`);
+      }
+
+      // Pad options to exactly 4 if fewer
+      if (Array.isArray(q.options) && q.options.length > 0 && q.options.length < 4) {
+        while (q.options.length < 4) {
+          (q.options as string[]).push(`—`);
+        }
+        warnings.push(`Quiz question [${i}] had fewer than 4 options; padded with placeholders`);
+      }
+
+      // Validate correctAnswer is in options (H2)
+      if (q.correctAnswer && Array.isArray(q.options)) {
+        const exactMatch = q.options.includes(q.correctAnswer);
+        if (!exactMatch) {
+          // Attempt fuzzy match: find option that starts with or contains correctAnswer
+          const fuzzyMatch = q.options.find(
+            (opt: string) =>
+              opt.includes(q.correctAnswer) || q.correctAnswer.includes(opt)
+          );
+          if (fuzzyMatch) {
+            warnings.push(
+              `Quiz question [${i}] correctAnswer "${q.correctAnswer}" fuzzy-matched to option "${fuzzyMatch}"`
+            );
+            q.correctAnswer = fuzzyMatch;
+          } else {
+            warnings.push(
+              `Quiz question [${i}] correctAnswer "${q.correctAnswer}" does not match any option — flagging for review`
+            );
+          }
+        }
+      }
+    }
+  }
+
+  // Activity object
+  if (!kit.activity || !kit.activity.title || !kit.activity.instructions) {
+    warnings.push("Activity object is missing or incomplete");
+  }
+
+  // Quality object
+  if (!kit.quality || typeof kit.quality !== "object") {
+    warnings.push("Quality object is missing");
+    (kit as unknown as Record<string, unknown>).quality = {
+      reviewRequired: true,
+      confidence: "low" as const,
+      reviewNotes: "Quality metadata was missing from AI response",
+    };
+  }
+
+  // If any warnings, force review
+  if (warnings.length > 0) {
+    kit.quality.reviewRequired = true;
+    if (kit.quality.confidence === "high") {
+      kit.quality.confidence = "medium";
+    }
+    const validationNote = `[Auto-validation] ${warnings.length} issue(s): ${warnings.join("; ")}`;
+    kit.quality.reviewNotes = kit.quality.reviewNotes
+      ? `${kit.quality.reviewNotes} | ${validationNote}`
+      : validationNote;
+  }
+
+  // A kit is "valid" if it has the bare minimum to render
+  const valid = Boolean(
+    kit.lesson?.hindi &&
+    kit.lesson?.santhali &&
+    Array.isArray(kit.vocabulary) &&
+    kit.vocabulary.length > 0
+  );
+
+  return { valid, warnings, kit };
+}
+
+
 export async function POST(request: NextRequest): Promise<NextResponse<GenerateLessonResponse>> {
   try {
+    // --- Rate limiting (H4) ---
+    const forwarded = request.headers.get("x-forwarded-for");
+    const clientIp = forwarded?.split(",")[0]?.trim() || request.headers.get("x-real-ip") || "unknown";
+    if (isRateLimited(clientIp)) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Too many requests. Please wait a moment before generating another lesson.",
+        },
+        { status: 429 }
+      );
+    }
+
     const body = await request.json().catch(() => null);
 
     if (!body || typeof body !== "object") {
@@ -68,6 +245,17 @@ export async function POST(request: NextRequest): Promise<NextResponse<GenerateL
     if (!lessonText || typeof lessonText !== "string" || !lessonText.trim()) {
       return NextResponse.json(
         { success: false, error: "Missing or empty required field: 'lessonText'." },
+        { status: 400 }
+      );
+    }
+
+    // Input length guard (C3)
+    if (lessonText.trim().length > MAX_LESSON_TEXT_LENGTH) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Lesson text is too long (${lessonText.trim().length} characters). Maximum allowed: ${MAX_LESSON_TEXT_LENGTH} characters.`,
+        },
         { status: 400 }
       );
     }
@@ -119,7 +307,8 @@ CRITICAL PEDAGOGICAL & LINGUISTIC RULES FOR SANTHALI:
    - If translation quality is high and authoritative, set reviewRequired=false and confidence="high".
    - If any translation or Ol Chiki representation is uncertain, set reviewRequired=true, confidence="medium" or "low", and clearly detail the uncertainty in reviewNotes.
    - Never present uncertain vernacular translations as authoritative.
-6. Educational Content: Produce rich pedagogical materials: simplified explanation, key vocabulary flashcards with clear child-friendly meanings, a multiple-choice quiz with 3-4 options and one clear correct answer, and an interactive tactile classroom activity.
+6. Educational Content: Produce rich pedagogical materials: simplified explanation, key vocabulary flashcards with clear child-friendly meanings, a multiple-choice quiz with exactly 4 options and one clear correct answer, and an interactive tactile classroom activity.
+7. Quiz correctAnswer MUST be an exact string copy of one of the quiz options — not a paraphrase or substring.
 `;
 
     const userPrompt = `
@@ -202,9 +391,9 @@ Generate a complete, structured JSON response adhering strictly to the schema.
                 options: {
                   type: Type.ARRAY,
                   items: { type: Type.STRING },
-                  description: "4 multiple choice options",
+                  description: "Exactly 4 multiple choice options",
                 },
-                correctAnswer: { type: Type.STRING, description: "Exact string matching one of the options" },
+                correctAnswer: { type: Type.STRING, description: "Exact string copy of one of the options" },
               },
               required: ["question", "options", "correctAnswer"],
             },
@@ -248,18 +437,45 @@ Generate a complete, structured JSON response adhering strictly to the schema.
 
     for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
       try {
-        const response = await ai.models.generateContent({
-          model: "gemini-3.6-flash",
-          contents: userPrompt,
-          config: generateConfig,
-        });
+        // Wrap Gemini call with AbortController timeout (C2)
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), GEMINI_TIMEOUT_MS);
 
-        responseText = response.text ?? null;
-        if (responseText) {
-          break;
+        try {
+          const response = await ai.models.generateContent({
+            model: "gemini-3.6-flash",
+            contents: userPrompt,
+            config: {
+              ...generateConfig,
+              abortSignal: controller.signal,
+            },
+          });
+
+          responseText = response.text ?? null;
+          if (responseText) {
+            break;
+          }
+        } finally {
+          clearTimeout(timeoutId);
         }
       } catch (err: unknown) {
         lastError = err;
+
+        // Check if this was our timeout abort
+        if (err instanceof Error && err.name === "AbortError") {
+          console.error(
+            `[Gemini API] Request attempt ${attempt + 1}/${MAX_RETRIES + 1} timed out after ${GEMINI_TIMEOUT_MS / 1000}s`
+          );
+          // Treat timeout as transient — retry
+          if (attempt < MAX_RETRIES) {
+            const delay = INITIAL_DELAY_MS * Math.pow(2, attempt) + Math.random() * 300;
+            console.warn(`[Gemini API] Retrying in ${Math.round(delay)}ms...`);
+            await sleep(delay);
+            continue;
+          }
+          break;
+        }
+
         const isTransient = isTransientGeminiError(err);
         console.error(
           `[Gemini API] Request attempt ${attempt + 1}/${MAX_RETRIES + 1} failed (transient=${isTransient}):`,
@@ -279,6 +495,17 @@ Generate a complete, structured JSON response adhering strictly to the schema.
     }
 
     if (!responseText) {
+      // Check for timeout
+      if (lastError instanceof Error && lastError.name === "AbortError") {
+        return NextResponse.json(
+          {
+            success: false,
+            error: "The AI generation timed out. Please try again with a shorter lesson text.",
+          },
+          { status: 504 }
+        );
+      }
+
       if (lastError && isTransientGeminiError(lastError)) {
         return NextResponse.json(
           {
@@ -312,7 +539,38 @@ Generate a complete, structured JSON response adhering strictly to the schema.
       );
     }
 
-    const learningKit: LearningKit = JSON.parse(responseText);
+    // --- Parse and validate (C1, H2, M1) ---
+    let rawParsed: Record<string, unknown>;
+    try {
+      rawParsed = JSON.parse(responseText);
+    } catch {
+      console.error("[Gemini API] Failed to parse response as JSON:", responseText.substring(0, 500));
+      return NextResponse.json(
+        {
+          success: false,
+          error: "The AI returned an invalid response format. Please try again.",
+        },
+        { status: 502 }
+      );
+    }
+
+    const { valid, warnings, kit: learningKit } = validateAndRepairLearningKit(rawParsed);
+
+    if (warnings.length > 0) {
+      console.warn(`[Gemini API] Validation produced ${warnings.length} warning(s):`, warnings);
+    }
+
+    if (!valid) {
+      console.error("[Gemini API] Generated kit failed minimum validation:", warnings);
+      return NextResponse.json(
+        {
+          success: false,
+          error: "The AI generated an incomplete learning kit. Please try again.",
+        },
+        { status: 502 }
+      );
+    }
+
     learningKit.verificationStatus = learningKit.quality.reviewRequired ? "needs_review" : "ai_generated";
 
     return NextResponse.json({
