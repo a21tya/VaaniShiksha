@@ -121,6 +121,11 @@ function validateAndRepairLearningKit(raw: Record<string, unknown>): ValidationR
   } else {
     for (let i = 0; i < kit.vocabulary.length; i++) {
       const v = kit.vocabulary[i];
+      // P1-4: Null/type guard for vocabulary items
+      if (!v || typeof v !== "object") {
+        warnings.push(`Vocabulary item [${i}] is null or not an object`);
+        continue;
+      }
       if (!v.hindi || !v.santhali || !v.romanization || !v.meaning) {
         warnings.push(`Vocabulary item [${i}] has missing fields`);
       }
@@ -130,9 +135,23 @@ function validateAndRepairLearningKit(raw: Record<string, unknown>): ValidationR
     }
   }
 
-  // Flashcards array
+  // Flashcards array (P1-5: per-item validation)
   if (!Array.isArray(kit.flashcards) || kit.flashcards.length === 0) {
     warnings.push("Flashcards array is missing or empty");
+  } else {
+    for (let i = 0; i < kit.flashcards.length; i++) {
+      const fc = kit.flashcards[i];
+      if (!fc || typeof fc !== "object") {
+        warnings.push(`Flashcard [${i}] is null or not an object`);
+        continue;
+      }
+      if (!fc.front || typeof fc.front !== "string" || !fc.front.trim()) {
+        warnings.push(`Flashcard [${i}] is missing a non-empty 'front' field`);
+      }
+      if (!fc.back || typeof fc.back !== "string" || !fc.back.trim()) {
+        warnings.push(`Flashcard [${i}] is missing a non-empty 'back' field`);
+      }
+    }
   }
 
   // Quiz array with correctAnswer validation (H2)
@@ -155,25 +174,13 @@ function validateAndRepairLearningKit(raw: Record<string, unknown>): ValidationR
         warnings.push(`Quiz question [${i}] had fewer than 4 options; padded with placeholders`);
       }
 
-      // Validate correctAnswer is in options (H2)
+      // P0-3: Validate correctAnswer is in options — never silently rewrite
       if (q.correctAnswer && Array.isArray(q.options)) {
         const exactMatch = q.options.includes(q.correctAnswer);
         if (!exactMatch) {
-          // Attempt fuzzy match: find option that starts with or contains correctAnswer
-          const fuzzyMatch = q.options.find(
-            (opt: string) =>
-              opt.includes(q.correctAnswer) || q.correctAnswer.includes(opt)
+          warnings.push(
+            `Quiz question [${i}] correctAnswer "${q.correctAnswer}" does not exactly match any option — flagging for review`
           );
-          if (fuzzyMatch) {
-            warnings.push(
-              `Quiz question [${i}] correctAnswer "${q.correctAnswer}" fuzzy-matched to option "${fuzzyMatch}"`
-            );
-            q.correctAnswer = fuzzyMatch;
-          } else {
-            warnings.push(
-              `Quiz question [${i}] correctAnswer "${q.correctAnswer}" does not match any option — flagging for review`
-            );
-          }
         }
       }
     }
@@ -672,7 +679,8 @@ Generate a complete, structured JSON response adhering strictly to the schema.
       );
     }
 
-    learningKit.verificationStatus = learningKit.quality.reviewRequired ? "needs_review" : "ai_generated";
+    // P0-2: All AI-generated Santhali content must require teacher review
+    learningKit.verificationStatus = "needs_review";
 
     return NextResponse.json({
       success: true,

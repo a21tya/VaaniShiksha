@@ -95,8 +95,9 @@ export const DEMO_LEARNING_KIT: LearningKit = {
       "1. Find 3 different leaves in your school yard.\n2. Bring them to class and say their names in Santhali (ᱥᱟᱠᱟᱢ - Sakam) to your teacher!",
   },
   quality: {
-    reviewRequired: false,
-    confidence: "high",
+    // P1-3: Metadata consistent with "not independently verified" disclaimer
+    reviewRequired: true,
+    confidence: "medium",
     reviewNotes:
       "AI-generated demo lesson. Standard Santhali primary botanical terms in Ol Chiki script. Not independently verified by a native Santhali linguist.",
   },

@@ -39,6 +39,7 @@ function CreateLessonForm() {
   // Teacher Review & Verification States
   const [isEditing, setIsEditing] = useState(false);
   const [editableKit, setEditableKit] = useState<LearningKit | null>(null);
+  const [showVerifyConfirm, setShowVerifyConfirm] = useState(false);
 
   // Flashcard & Quiz Interactive States
   const [activeCardIndex, setActiveCardIndex] = useState(0);
@@ -129,17 +130,29 @@ function CreateLessonForm() {
 
   const handleSaveEdits = async () => {
     if (!editableKit) return;
-    const kitToSave = JSON.parse(JSON.stringify(editableKit));
+    const kitToSave: LearningKit = JSON.parse(JSON.stringify(editableKit));
+
+    // P0-1: Edits invalidate any prior verification
+    kitToSave.verificationStatus = "needs_review";
+    kitToSave.verifiedAt = undefined;
+    kitToSave.verifiedBy = undefined;
+
     setLearningKit(kitToSave);
     setIsEditing(false);
 
     // Sync to localStorage/IndexedDB
     const saved = await saveLessonToLibrary(kitToSave, currentLessonId || undefined);
     setCurrentLessonId(saved.id);
-    setSaveSuccessMessage("Edits saved to local Lesson Library!");
+    setSaveSuccessMessage("Edits saved to local Lesson Library! Verification status reset — please re-verify.");
   };
 
-  const handleApproveAndVerify = async () => {
+  // P1-1: Confirmation gate — called by UI buttons instead of directly verifying
+  const handleRequestVerification = () => {
+    setShowVerifyConfirm(true);
+  };
+
+  const handleConfirmVerification = async () => {
+    setShowVerifyConfirm(false);
     const baseKit = editableKit || learningKit;
     if (!baseKit) return;
 
@@ -513,7 +526,7 @@ function CreateLessonForm() {
                     </button>
                     <button
                       type="button"
-                      onClick={handleApproveAndVerify}
+                      onClick={handleRequestVerification}
                       className="px-4 py-2 text-xs font-bold rounded-xl bg-emerald-700 text-white hover:bg-emerald-800 transition-colors shadow-xs"
                     >
                       ✅ Save & Approve
@@ -537,7 +550,7 @@ function CreateLessonForm() {
                     </button>
                     <button
                       type="button"
-                      onClick={handleApproveAndVerify}
+                      onClick={handleRequestVerification}
                       className="px-4 py-2 text-xs font-bold rounded-xl bg-emerald-700 text-white hover:bg-emerald-800 transition-colors shadow-xs"
                     >
                       {learningKit.verificationStatus === "verified" ? "Re-verify Kit" : "✅ Approve & Verify"}
@@ -555,13 +568,47 @@ function CreateLessonForm() {
               </div>
             </div>
 
-            {/* Quality Notes */}
+            {/* P1-1: Verification Confirmation Dialog */}
+            {showVerifyConfirm && (
+              <div className="p-5 rounded-2xl bg-emerald-50 border-2 border-emerald-300 space-y-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">✅</span>
+                  <span className="font-bold text-emerald-950 text-sm">Confirm Teacher Verification</span>
+                </div>
+                <p className="text-xs sm:text-sm text-emerald-900">
+                  By approving, you confirm that you have reviewed the Santhali translations (Ol Chiki script),
+                  vocabulary terms, quiz questions and answers, and worksheet content in this lesson kit.
+                  This will mark the lesson as teacher-verified for student use.
+                </p>
+                <div className="flex items-center gap-2.5">
+                  <button
+                    type="button"
+                    onClick={handleConfirmVerification}
+                    className="px-4 py-2 text-xs font-bold rounded-xl bg-emerald-700 text-white hover:bg-emerald-800 transition-colors shadow-xs"
+                  >
+                    ✅ Yes, I Have Reviewed — Verify
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowVerifyConfirm(false)}
+                    className="px-3.5 py-2 text-xs font-semibold rounded-xl bg-slate-200 text-slate-800 hover:bg-slate-300 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* P1-2: AI Self-Assessment Notes (formerly "Model Linguistic Notes") */}
             {learningKit.quality.reviewNotes && (
               <div className="p-4 rounded-2xl bg-amber-50/50 border border-amber-200 text-xs sm:text-sm text-slate-700">
                 <span className="font-bold text-amber-950 block mb-1">
-                  🔍 Model Linguistic Notes:
+                  🤖 AI Self-Assessment Notes:
                 </span>
                 <p>{learningKit.quality.reviewNotes}</p>
+                <p className="text-[11px] text-slate-500 italic mt-2">
+                  These notes are the AI model&apos;s own evaluation, not an independent linguistic review.
+                </p>
               </div>
             )}
           </div>
@@ -1228,7 +1275,7 @@ function CreateLessonForm() {
           <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 space-y-1.5">
             <div className="font-bold text-slate-900">2. Vocabulary Extraction</div>
             <p className="text-slate-600 text-xs sm:text-sm">
-              Identifies key primary terms and generates visual vocabulary cards with audio prompts.
+              Identifies key primary terms and generates bilingual vocabulary cards with Ol Chiki script and romanization.
             </p>
           </div>
           <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 space-y-1.5">
