@@ -8,13 +8,14 @@ import { LearningKit, SavedLesson } from "@/types/lesson";
 import { getSavedLessonById } from "@/lib/storage";
 import { DEMO_LEARNING_KIT } from "@/lib/demo-data";
 
-const STEPS = [
+const BASE_STEPS = [
   { id: 1, name: "Story Lesson", icon: "📖" },
   { id: 2, name: "Vocabulary", icon: "🔤" },
   { id: 3, name: "Flashcards", icon: "📇" },
   { id: 4, name: "Quiz", icon: "📝" },
   { id: 5, name: "Activity", icon: "🎨" },
 ];
+const WORKSHEET_STEP = { id: 6, name: "Worksheet", icon: "📋" };
 
 function StudentModeContent() {
   const searchParams = useSearchParams();
@@ -45,6 +46,8 @@ function StudentModeContent() {
   }, [lessonIdParam]);
 
   const currentCard = kit.flashcards && kit.flashcards.length > 0 ? kit.flashcards[activeCardIndex] : null;
+  const hasWorksheet = Boolean(kit.worksheet && kit.worksheet.items && kit.worksheet.items.length > 0);
+  const steps = hasWorksheet ? [...BASE_STEPS, WORKSHEET_STEP] : BASE_STEPS;
 
   return (
     <PageContainer className="max-w-4xl mx-auto flex flex-col gap-8">
@@ -99,8 +102,8 @@ function StudentModeContent() {
 
       {/* Child-Friendly Progression Navigation Bar */}
       <div className="bg-white rounded-2xl border border-slate-200 p-2 sm:p-3 shadow-2xs">
-        <div className="grid grid-cols-5 gap-1 text-center">
-          {STEPS.map((step) => {
+        <div className={`grid gap-1 text-center ${hasWorksheet ? 'grid-cols-6' : 'grid-cols-5'}`}>
+          {steps.map((step) => {
             const isActive = currentStep === step.id;
             const isCompleted = currentStep > step.id;
 
@@ -424,9 +427,9 @@ function StudentModeContent() {
         </section>
       )}
 
-      {/* STEP 5: Activity & Completion */}
+      {/* STEP 5: Activity */}
       {currentStep === 5 && (
-        <section className="space-y-6">
+        <section className="space-y-8">
           <div className="bg-gradient-to-r from-amber-600 to-orange-600 rounded-3xl p-6 sm:p-8 text-white shadow-sm space-y-4">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-xs flex items-center justify-center text-3xl shrink-0">
@@ -447,40 +450,35 @@ function StudentModeContent() {
             </p>
           </div>
 
-          {/* Completion Celebration State */}
-          <div className="bg-white rounded-3xl border-2 border-emerald-300 p-8 text-center space-y-4 shadow-sm">
-            <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-900 font-bold text-3xl flex items-center justify-center mx-auto">
-              🌟
-            </div>
-            <div className="space-y-1">
-              <h3 className="text-2xl font-extrabold text-slate-900">
-                Lesson Completed!
-              </h3>
-              <p className="text-sm text-slate-600 max-w-md mx-auto">
-                Great job studying <strong>{kit.title}</strong> in Santhali!
-              </p>
-            </div>
+          {/* Show completion here only if no worksheet */}
+          {!hasWorksheet && (
+            <>
+              <div className="bg-white rounded-3xl border-2 border-emerald-300 p-8 text-center space-y-4 shadow-sm">
+                <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-900 font-bold text-3xl flex items-center justify-center mx-auto">
+                  🌟
+                </div>
+                <div className="space-y-1">
+                  <h3 className="text-2xl font-extrabold text-slate-900">Lesson Completed!</h3>
+                  <p className="text-sm text-slate-600 max-w-md mx-auto">
+                    Great job studying <strong>{kit.title}</strong> in Santhali!
+                  </p>
+                </div>
+                <div className="pt-3 flex flex-col sm:flex-row items-center justify-center gap-3">
+                  <button type="button" onClick={() => { setCurrentStep(1); setSelectedQuizAnswers({}); setActiveCardIndex(0); }} className="w-full sm:w-auto px-6 py-3 text-xs sm:text-sm font-bold text-slate-800 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors">🔄 Restart Lesson</button>
+                  <Link href="/lessons" className="w-full sm:w-auto px-6 py-3 text-xs sm:text-sm font-bold text-white bg-emerald-700 hover:bg-emerald-800 rounded-xl transition-colors shadow-2xs">📚 Return to Lesson Library</Link>
+                </div>
+              </div>
+            </>
+          )}
 
-            <div className="pt-3 flex flex-col sm:flex-row items-center justify-center gap-3">
-              <button
-                type="button"
-                onClick={() => {
-                  setCurrentStep(1);
-                  setSelectedQuizAnswers({});
-                  setActiveCardIndex(0);
-                }}
-                className="w-full sm:w-auto px-6 py-3 text-xs sm:text-sm font-bold text-slate-800 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors"
-              >
-                🔄 Restart Lesson
+          {/* Next step arrow if worksheet exists */}
+          {hasWorksheet && (
+            <div className="pt-2 flex justify-end">
+              <button type="button" onClick={() => setCurrentStep(6)} className="px-6 py-3 text-sm font-bold rounded-2xl bg-emerald-700 text-white hover:bg-emerald-800 shadow-xs">
+                Next: Worksheet ▶
               </button>
-              <Link
-                href="/lessons"
-                className="w-full sm:w-auto px-6 py-3 text-xs sm:text-sm font-bold text-white bg-emerald-700 hover:bg-emerald-800 rounded-xl transition-colors shadow-2xs"
-              >
-                📚 Return to Lesson Library
-              </Link>
             </div>
-          </div>
+          )}
 
           <div className="pt-2 flex justify-start">
             <button
@@ -490,6 +488,79 @@ function StudentModeContent() {
             >
               ◀ Back to Quiz
             </button>
+          </div>
+        </section>
+      )}
+
+      {/* STEP 6: Worksheet (only when data exists) */}
+      {currentStep === 6 && hasWorksheet && kit.worksheet && (
+        <section className="space-y-6">
+          <div className="bg-white rounded-3xl border border-violet-200 p-6 sm:p-8 shadow-2xs space-y-5">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                <span>📋 Worksheet Practice</span>
+              </h2>
+              <span className="text-xs font-semibold text-violet-800 bg-violet-50 px-3 py-1 rounded-full border border-violet-200">
+                Hindi + Santhali
+              </span>
+            </div>
+
+            <h3 className="text-base sm:text-lg font-bold text-slate-900">{kit.worksheet.title}</h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="p-4 rounded-2xl bg-amber-50/70 border border-amber-200 space-y-1.5">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-900">निर्देश (Hindi)</span>
+                <p className="text-sm text-slate-900">{kit.worksheet.instructionsHindi}</p>
+              </div>
+              <div className="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 space-y-1.5">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-900">ᱛᱟᱞᱢᱟ (Santhali)</span>
+                <p className="text-sm font-santhali font-bold text-emerald-950">{kit.worksheet.instructionsSanthali}</p>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              {kit.worksheet.items.map((item, idx) => (
+                <div key={idx} className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <span className="w-7 h-7 rounded-full bg-violet-200 text-violet-900 text-sm font-bold flex items-center justify-center shrink-0">
+                      {idx + 1}
+                    </span>
+                    <span className="px-2.5 py-0.5 rounded-full bg-violet-100 text-violet-800 text-[10px] font-bold uppercase">
+                      {item.type.replace("_", " ")}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                      <span className="text-[10px] font-bold text-amber-800 uppercase">Hindi</span>
+                      <p className="text-sm text-slate-900 mt-0.5">{item.promptHindi}</p>
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-bold text-emerald-800 uppercase">Santhali</span>
+                      <p className="text-sm font-santhali font-bold text-emerald-950 mt-0.5">{item.promptSanthali}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Completion Celebration */}
+          <div className="bg-white rounded-3xl border-2 border-emerald-300 p-8 text-center space-y-4 shadow-sm">
+            <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-900 font-bold text-3xl flex items-center justify-center mx-auto">🌟</div>
+            <div className="space-y-1">
+              <h3 className="text-2xl font-extrabold text-slate-900">Lesson Completed!</h3>
+              <p className="text-sm text-slate-600 max-w-md mx-auto">
+                Great job studying <strong>{kit.title}</strong> in Santhali!
+              </p>
+            </div>
+            <div className="pt-3 flex flex-col sm:flex-row items-center justify-center gap-3">
+              <button type="button" onClick={() => { setCurrentStep(1); setSelectedQuizAnswers({}); setActiveCardIndex(0); }} className="w-full sm:w-auto px-6 py-3 text-xs sm:text-sm font-bold text-slate-800 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors">🔄 Restart Lesson</button>
+              <Link href="/lessons" className="w-full sm:w-auto px-6 py-3 text-xs sm:text-sm font-bold text-white bg-emerald-700 hover:bg-emerald-800 rounded-xl transition-colors shadow-2xs">📚 Return to Lesson Library</Link>
+            </div>
+          </div>
+
+          <div className="pt-2 flex justify-start">
+            <button type="button" onClick={() => setCurrentStep(5)} className="px-6 py-3 text-sm font-bold rounded-2xl bg-slate-100 text-slate-800 hover:bg-slate-200">◀ Back to Activity</button>
           </div>
         </section>
       )}

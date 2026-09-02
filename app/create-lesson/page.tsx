@@ -1089,6 +1089,114 @@ function CreateLessonForm() {
               </p>
             )}
           </section>
+
+          {/* Suggested FLN / NIPUN Alignment Section */}
+          {learningKit.pedagogy && (
+            <section className="bg-white rounded-3xl border border-indigo-200 p-6 md:p-8 shadow-2xs space-y-5">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                  <span>🎯 Suggested FLN Alignment</span>
+                </h3>
+                <span className="text-xs font-semibold text-indigo-800 bg-indigo-50 px-3 py-1 rounded-full border border-indigo-200">
+                  AI-Suggested • Not Officially Certified
+                </span>
+              </div>
+
+              <div className="bg-indigo-50/50 border border-indigo-100 rounded-2xl p-4 text-xs sm:text-sm text-indigo-900">
+                <p className="font-medium">
+                  ⚠️ This alignment is <strong>AI-suggested</strong> based on lesson content and grade level. It has <strong>not</strong> been officially certified by NIPUN Bharat authorities. Teacher review is required before using in formal curriculum planning.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Learning Outcome</span>
+                  <p className="text-sm font-medium text-slate-900">{learningKit.pedagogy.learningOutcome}</p>
+                </div>
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Skill Focus</span>
+                  <p className="text-sm font-medium text-slate-900">{learningKit.pedagogy.skillFocus}</p>
+                </div>
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5 sm:col-span-2">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Suggested NIPUN Bharat Alignment</span>
+                  <p className="text-sm font-medium text-slate-900">{learningKit.pedagogy.suggestedNipunAlignment}</p>
+                </div>
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Activity Type</span>
+                  <p className="text-sm font-medium text-slate-900">{learningKit.pedagogy.activityType}</p>
+                </div>
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Assessment Focus</span>
+                  <p className="text-sm font-medium text-slate-900">{learningKit.pedagogy.assessmentFocus}</p>
+                </div>
+              </div>
+            </section>
+          )}
+
+          {/* Bilingual Worksheet Section */}
+          {learningKit.worksheet && (
+            <section className="bg-white rounded-3xl border border-violet-200 p-6 md:p-8 shadow-2xs space-y-5">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                  <span>📝 Bilingual Worksheet</span>
+                </h3>
+                <span className="text-xs font-semibold text-violet-800 bg-violet-50 px-3 py-1 rounded-full border border-violet-200">
+                  Hindi + Santhali
+                </span>
+              </div>
+
+              <div className="space-y-3">
+                <h4 className="text-base sm:text-lg font-bold text-slate-900">{learningKit.worksheet.title}</h4>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="p-4 rounded-2xl bg-amber-50/70 border border-amber-200 space-y-1.5">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-amber-900">Instructions (Hindi)</span>
+                    <p className="text-sm text-slate-900">{learningKit.worksheet.instructionsHindi}</p>
+                  </div>
+                  <div className="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 space-y-1.5">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-900">Instructions (Santhali / Ol Chiki)</span>
+                    <p className="text-sm font-santhali font-bold text-emerald-950">{learningKit.worksheet.instructionsSanthali}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                  Worksheet Items ({learningKit.worksheet.items?.length || 0})
+                </span>
+                <div className="space-y-3">
+                  {learningKit.worksheet.items?.map((item, idx) => (
+                    <div key={idx} className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="w-6 h-6 rounded-full bg-violet-100 text-violet-800 text-xs font-bold flex items-center justify-center shrink-0">
+                          {idx + 1}
+                        </span>
+                        <span className="px-2.5 py-0.5 rounded-full bg-violet-100 text-violet-800 text-[10px] font-bold uppercase">
+                          {item.type.replace("_", " ")}
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div className="space-y-0.5">
+                          <span className="text-[10px] font-bold text-amber-800 uppercase">Hindi</span>
+                          <p className="text-sm text-slate-900">{item.promptHindi}</p>
+                        </div>
+                        <div className="space-y-0.5">
+                          <span className="text-[10px] font-bold text-emerald-800 uppercase">Santhali</span>
+                          <p className="text-sm font-santhali font-bold text-emerald-950">{item.promptSanthali}</p>
+                        </div>
+                      </div>
+                      {item.answer && (
+                        <div className="pt-1 border-t border-slate-200">
+                          <span className="text-[10px] font-bold text-slate-500 uppercase">Answer (Teacher Only)</span>
+                          <p className="text-xs text-slate-700">{item.answer}</p>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
+          )}
         </div>
       )}
 

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenAI, Type } from "@google/genai";
-import { LearningKit, GenerateLessonResponse } from "@/types/lesson";
+import { LearningKit, GenerateLessonResponse, WorksheetItem } from "@/types/lesson";
+
+const VALID_WORKSHEET_TYPES: WorksheetItem["type"][] = ["match", "fill", "identify", "circle", "trace", "short_answer"];
 
 // --- Constants ---
 const MAX_RETRIES = 3;
@@ -182,6 +184,52 @@ function validateAndRepairLearningKit(raw: Record<string, unknown>): ValidationR
     warnings.push("Activity object is missing or incomplete");
   }
 
+  // Pedagogy object (optional — warn but do not reject if missing)
+  if (kit.pedagogy && typeof kit.pedagogy === "object") {
+    for (const pf of ["learningOutcome", "skillFocus", "suggestedNipunAlignment", "activityType", "assessmentFocus"] as const) {
+      if (!kit.pedagogy[pf] || typeof kit.pedagogy[pf] !== "string" || !kit.pedagogy[pf].trim()) {
+        warnings.push(`Pedagogy field '${pf}' is missing or empty`);
+      }
+    }
+  } else if (kit.pedagogy === undefined || kit.pedagogy === null) {
+    warnings.push("Pedagogy metadata was not generated");
+  }
+
+  // Worksheet object (optional — warn but do not reject if missing)
+  if (kit.worksheet && typeof kit.worksheet === "object") {
+    if (!kit.worksheet.title || typeof kit.worksheet.title !== "string" || !kit.worksheet.title.trim()) {
+      warnings.push("Worksheet title is missing or empty");
+    }
+    if (!kit.worksheet.instructionsHindi || typeof kit.worksheet.instructionsHindi !== "string" || !kit.worksheet.instructionsHindi.trim()) {
+      warnings.push("Worksheet Hindi instructions are missing or empty");
+    }
+    if (!kit.worksheet.instructionsSanthali || typeof kit.worksheet.instructionsSanthali !== "string" || !kit.worksheet.instructionsSanthali.trim()) {
+      warnings.push("Worksheet Santhali instructions are missing or empty");
+    }
+    if (!Array.isArray(kit.worksheet.items) || kit.worksheet.items.length === 0) {
+      warnings.push("Worksheet items array is missing or empty");
+    } else {
+      for (let i = 0; i < kit.worksheet.items.length; i++) {
+        const item = kit.worksheet.items[i];
+        if (!item || typeof item !== "object") {
+          warnings.push(`Worksheet item [${i}] is null or not an object`);
+          continue;
+        }
+        if (!item.type || !VALID_WORKSHEET_TYPES.includes(item.type)) {
+          warnings.push(`Worksheet item [${i}] has invalid type: '${item.type}'`);
+        }
+        if (!item.promptHindi || typeof item.promptHindi !== "string" || !item.promptHindi.trim()) {
+          warnings.push(`Worksheet item [${i}] is missing Hindi prompt`);
+        }
+        if (!item.promptSanthali || typeof item.promptSanthali !== "string" || !item.promptSanthali.trim()) {
+          warnings.push(`Worksheet item [${i}] is missing Santhali prompt`);
+        }
+      }
+    }
+  } else if (kit.worksheet === undefined || kit.worksheet === null) {
+    warnings.push("Worksheet was not generated");
+  }
+
   // Quality object
   if (!kit.quality || typeof kit.quality !== "object") {
     warnings.push("Quality object is missing");
@@ -309,6 +357,21 @@ CRITICAL PEDAGOGICAL & LINGUISTIC RULES FOR SANTHALI:
    - Never present uncertain vernacular translations as authoritative.
 6. Educational Content: Produce rich pedagogical materials: simplified explanation, key vocabulary flashcards with clear child-friendly meanings, a multiple-choice quiz with exactly 4 options and one clear correct answer, and an interactive tactile classroom activity.
 7. Quiz correctAnswer MUST be an exact string copy of one of the quiz options — not a paraphrase or substring.
+
+FOUNDATIONAL LITERACY & NUMERACY (FLN) / NIPUN BHARAT ALIGNMENT:
+8. This is foundational primary education (Grades 1–5). Generate pedagogy metadata aligned with India's NIPUN Bharat / FLN framework.
+9. The suggested learning outcome must be observable, child-friendly, and age/grade-appropriate (e.g., "The child can identify and name 4 parts of a plant in Santhali").
+10. Specify the skill focus: foundational literacy (reading, writing, listening, speaking) or foundational numeracy (number sense, operations, patterns, measurement).
+11. Provide a "Suggested NIPUN Bharat Alignment" — a brief description of the relevant FLN competency area. Do NOT claim official NIPUN certification or invent official codes. This is a suggested alignment only.
+12. Teacher verification remains mandatory before classroom use.
+
+BILINGUAL WORKSHEET GENERATION:
+13. Generate a bilingual worksheet with 5–8 activity items suitable for primary classroom use.
+14. Worksheet instructions must be provided in both Hindi and Santhali (Ol Chiki script).
+15. Each worksheet item must include both a Hindi prompt and a Santhali prompt.
+16. Worksheet item types: "match" (matching pairs), "fill" (fill-in-the-blank), "identify" (identify from image/description), "circle" (circle the correct answer), "trace" (trace letters/words), "short_answer" (short written response).
+17. Keep worksheet items simple, age-appropriate, and aligned with the lesson vocabulary.
+18. If uncertain about Santhali worksheet content, set quality.reviewRequired=true and explain in reviewNotes.
 `;
 
     const userPrompt = `
@@ -332,7 +395,7 @@ Generate a complete, structured JSON response adhering strictly to the schema.
       systemInstruction,
       responseMimeType: "application/json",
       thinkingConfig: {
-        thinkingBudget: 2048,
+        thinkingBudget: 4096,
       },
       responseSchema: {
         type: Type.OBJECT,
@@ -415,6 +478,42 @@ Generate a complete, structured JSON response adhering strictly to the schema.
             },
             required: ["reviewRequired", "confidence", "reviewNotes"],
           },
+          pedagogy: {
+            type: Type.OBJECT,
+            description: "Suggested FLN / NIPUN Bharat pedagogy alignment metadata (AI-suggested, not officially certified)",
+            properties: {
+              learningOutcome: { type: Type.STRING, description: "Observable, child-friendly learning outcome for this lesson (e.g., 'The child can identify and name 4 parts of a plant in Santhali')" },
+              skillFocus: { type: Type.STRING, description: "Primary foundational skill area: e.g., 'Foundational Literacy – Vocabulary & Reading', 'Foundational Numeracy – Number Sense'" },
+              suggestedNipunAlignment: { type: Type.STRING, description: "Brief suggested NIPUN Bharat / FLN competency alignment. Do NOT invent official codes. Example: 'FLN Literacy – Bilingual vocabulary acquisition and script recognition (Ol Chiki + Devanagari)'" },
+              activityType: { type: Type.STRING, description: "Type of learning activity: e.g., 'Hands-on exploration', 'Bilingual word recognition', 'Interactive matching'" },
+              assessmentFocus: { type: Type.STRING, description: "What the quiz/assessment measures: e.g., 'Recall of Santhali botanical vocabulary in Ol Chiki script'" },
+            },
+            required: ["learningOutcome", "skillFocus", "suggestedNipunAlignment", "activityType", "assessmentFocus"],
+          },
+          worksheet: {
+            type: Type.OBJECT,
+            description: "Bilingual classroom worksheet with 5-8 activity items in Hindi and Santhali",
+            properties: {
+              title: { type: Type.STRING, description: "Worksheet title (bilingual Hindi + Santhali)" },
+              instructionsHindi: { type: Type.STRING, description: "Worksheet instructions in Hindi for the student" },
+              instructionsSanthali: { type: Type.STRING, description: "Worksheet instructions in Santhali (Ol Chiki script)" },
+              items: {
+                type: Type.ARRAY,
+                description: "5 to 8 worksheet activity items",
+                items: {
+                  type: Type.OBJECT,
+                  properties: {
+                    type: { type: Type.STRING, enum: ["match", "fill", "identify", "circle", "trace", "short_answer"], description: "Activity type" },
+                    promptHindi: { type: Type.STRING, description: "Activity prompt in Hindi" },
+                    promptSanthali: { type: Type.STRING, description: "Activity prompt in Santhali (Ol Chiki script)" },
+                    answer: { type: Type.STRING, description: "Expected answer or correct response (for teacher reference)" },
+                  },
+                  required: ["type", "promptHindi", "promptSanthali"],
+                },
+              },
+            },
+            required: ["title", "instructionsHindi", "instructionsSanthali", "items"],
+          },
         },
         required: [
           "title",
@@ -428,6 +527,8 @@ Generate a complete, structured JSON response adhering strictly to the schema.
           "quiz",
           "activity",
           "quality",
+          "pedagogy",
+          "worksheet",
         ],
       },
     };

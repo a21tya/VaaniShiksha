@@ -34,9 +34,29 @@ export interface LearningKit {
     confidence: "high" | "medium" | "low";
     reviewNotes: string;
   };
+  pedagogy?: {
+    learningOutcome: string;
+    skillFocus: string;
+    suggestedNipunAlignment: string;
+    activityType: string;
+    assessmentFocus: string;
+  };
+  worksheet?: {
+    title: string;
+    instructionsHindi: string;
+    instructionsSanthali: string;
+    items: Array<WorksheetItem>;
+  };
   verificationStatus?: "ai_generated" | "needs_review" | "verified";
   verifiedAt?: string;
   verifiedBy?: string;
+}
+
+export interface WorksheetItem {
+  type: "match" | "fill" | "identify" | "circle" | "trace" | "short_answer";
+  promptHindi: string;
+  promptSanthali: string;
+  answer?: string;
 }
 
 export interface SavedLesson {
