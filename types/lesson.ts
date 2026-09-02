@@ -9,16 +9,19 @@ export interface LearningKit {
     santhali: string;
     romanization: string;
     simpleExplanation: string;
+    audioId?: string;
   };
   vocabulary: Array<{
     hindi: string;
     santhali: string;
     romanization: string;
     meaning: string;
+    audioId?: string;
   }>;
   flashcards: Array<{
     front: string;
     back: string;
+    audioId?: string;
   }>;
   quiz: Array<{
     question: string;
@@ -57,6 +60,7 @@ export interface WorksheetItem {
   promptHindi: string;
   promptSanthali: string;
   answer?: string;
+  audioId?: string;
 }
 
 export interface SavedLesson {
@@ -90,3 +94,9 @@ export type GenerateLessonResponse =
       success: false;
       error: string;
     };
+
+export interface AudioRecord {
+  id: string;
+  blob: Blob;
+  lessonId: string;
+}
