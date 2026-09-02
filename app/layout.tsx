@@ -18,7 +18,18 @@ export const metadata: Metadata = {
   title: "VaaniShiksha | AI-Powered Vernacular Pedagogy (SIH26042)",
   description:
     "AI-Powered Vernacular Pedagogy and Real-Time Translation Tool for Mother Tongue-Based Primary Education.",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "VaaniShiksha",
+  },
 };
+
+export const viewport = {
+  themeColor: "#fcfbf9",
+};
+
 
 export default function RootLayout({
   children,

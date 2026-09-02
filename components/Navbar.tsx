@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 
 const NAV_ITEMS = [
   { label: "Home", href: "/" },
@@ -16,6 +17,7 @@ const NAV_ITEMS = [
 export default function Navbar() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const isOnline = useNetworkStatus();
 
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-amber-100 shadow-xs">
@@ -150,6 +152,15 @@ export default function Navbar() {
               </Link>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Offline Status Banner */}
+      {!isOnline && (
+        <div className="bg-amber-100 border-b border-amber-200 py-1.5 px-4 text-center shadow-xs">
+          <p className="text-xs font-semibold text-amber-900">
+            You are offline. Saved lessons in the Library and Student Mode are fully accessible.
+          </p>
         </div>
       )}
     </header>

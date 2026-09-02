@@ -10,6 +10,7 @@ import {
   getSavedLessonById,
   saveLessonToLibrary,
 } from "@/lib/storage";
+import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 
 function CreateLessonForm() {
   const searchParams = useSearchParams();
@@ -32,6 +33,9 @@ function CreateLessonForm() {
   // Learning Kit State
   const [learningKit, setLearningKit] = useState<LearningKit | null>(null);
   
+  // Offline status
+  const isOnline = useNetworkStatus();
+  
   // Teacher Review & Verification States
   const [isEditing, setIsEditing] = useState(false);
   const [editableKit, setEditableKit] = useState<LearningKit | null>(null);
@@ -43,19 +47,21 @@ function CreateLessonForm() {
 
   // Load existing lesson from URL id parameter on mount
   useEffect(() => {
-    if (lessonIdParam) {
-      const saved = getSavedLessonById(lessonIdParam);
-      if (saved) {
-        const timer = setTimeout(() => {
+    let mounted = true;
+    const fetchLesson = async () => {
+      if (lessonIdParam) {
+        const saved = await getSavedLessonById(lessonIdParam);
+        if (saved && mounted) {
           setCurrentLessonId(saved.id);
           setTitle(saved.title);
           setGrade(saved.grade);
           setSubject(saved.subject);
           setLearningKit(saved.kit);
-        }, 0);
-        return () => clearTimeout(timer);
+        }
       }
-    }
+    };
+    fetchLesson();
+    return () => { mounted = false; };
   }, [lessonIdParam]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -121,19 +127,19 @@ function CreateLessonForm() {
     setIsEditing(false);
   };
 
-  const handleSaveEdits = () => {
+  const handleSaveEdits = async () => {
     if (!editableKit) return;
     const kitToSave = JSON.parse(JSON.stringify(editableKit));
     setLearningKit(kitToSave);
     setIsEditing(false);
 
-    // Sync to localStorage
-    const saved = saveLessonToLibrary(kitToSave, currentLessonId || undefined);
+    // Sync to localStorage/IndexedDB
+    const saved = await saveLessonToLibrary(kitToSave, currentLessonId || undefined);
     setCurrentLessonId(saved.id);
     setSaveSuccessMessage("Edits saved to local Lesson Library!");
   };
 
-  const handleApproveAndVerify = () => {
+  const handleApproveAndVerify = async () => {
     const baseKit = editableKit || learningKit;
     if (!baseKit) return;
 
@@ -150,16 +156,16 @@ function CreateLessonForm() {
     setEditableKit(null);
     setIsEditing(false);
 
-    // Sync to localStorage
-    const saved = saveLessonToLibrary(updatedKit, currentLessonId || undefined);
+    // Sync to IndexedDB
+    const saved = await saveLessonToLibrary(updatedKit, currentLessonId || undefined);
     setCurrentLessonId(saved.id);
     setSaveSuccessMessage("Approved & Verified! Saved to Lesson Library.");
   };
 
-  const handleSaveToLibrary = () => {
+  const handleSaveToLibrary = async () => {
     const baseKit = editableKit || learningKit;
     if (!baseKit) return;
-    const saved = saveLessonToLibrary(baseKit, currentLessonId || undefined);
+    const saved = await saveLessonToLibrary(baseKit, currentLessonId || undefined);
     setCurrentLessonId(saved.id);
     setSaveSuccessMessage("Lesson successfully saved to Lesson Library!");
   };
@@ -289,13 +295,20 @@ function CreateLessonForm() {
         </div>
 
         {/* Action Button & Loading Indicator */}
+        {!isOnline && (
+          <div className="p-4 rounded-2xl bg-slate-100 border border-slate-300 text-slate-800 text-sm font-medium">
+            <span className="text-lg mr-2">🔌</span>
+            You are currently offline. AI generation requires an internet connection.
+          </div>
+        )}
+
         <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4">
           <button
             type="submit"
-            disabled={isLoading}
+            disabled={isLoading || !isOnline}
             className={`w-full sm:w-auto px-8 py-3.5 rounded-xl font-semibold text-sm sm:text-base shadow-xs transition-all flex items-center justify-center gap-2.5 ${
-              isLoading
-                ? "bg-amber-400 text-amber-950 cursor-wait"
+              isLoading || !isOnline
+                ? "bg-slate-300 text-slate-500 cursor-not-allowed"
                 : "bg-amber-600 text-white hover:bg-amber-700 active:scale-98"
             }`}
           >

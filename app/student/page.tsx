@@ -33,16 +33,18 @@ function StudentModeContent() {
   const [selectedQuizAnswers, setSelectedQuizAnswers] = useState<{ [qIdx: number]: string }>({});
 
   useEffect(() => {
-    if (lessonIdParam) {
-      const loaded = getSavedLessonById(lessonIdParam);
-      if (loaded) {
-        const timer = setTimeout(() => {
+    let mounted = true;
+    const fetchLesson = async () => {
+      if (lessonIdParam) {
+        const loaded = await getSavedLessonById(lessonIdParam);
+        if (loaded && mounted) {
           setSavedLesson(loaded);
           setKit(loaded.kit);
-        }, 0);
-        return () => clearTimeout(timer);
+        }
       }
-    }
+    };
+    fetchLesson();
+    return () => { mounted = false; };
   }, [lessonIdParam]);
 
   const currentCard = kit.flashcards && kit.flashcards.length > 0 ? kit.flashcards[activeCardIndex] : null;

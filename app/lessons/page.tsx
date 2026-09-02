@@ -12,16 +12,26 @@ export default function LessonLibraryPage() {
   const [deleteConfirmationId, setDeleteConfirmationId] = useState<string | null>(null);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setLessons(getSavedLessons());
-      setIsLoaded(true);
-    }, 0);
-    return () => clearTimeout(timer);
+    let mounted = true;
+    const fetchLessons = async () => {
+      try {
+        const data = await getSavedLessons();
+        if (mounted) {
+          setLessons(data);
+          setIsLoaded(true);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    fetchLessons();
+    return () => { mounted = false; };
   }, []);
 
-  const handleDelete = (id: string) => {
-    deleteSavedLesson(id);
-    setLessons(getSavedLessons());
+  const handleDelete = async (id: string) => {
+    await deleteSavedLesson(id);
+    const updated = await getSavedLessons();
+    setLessons(updated);
     setDeleteConfirmationId(null);
   };
 

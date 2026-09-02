@@ -1,34 +1,34 @@
 import { LearningKit, SavedLesson } from "@/types/lesson";
 import { DEMO_SAVED_LESSON } from "@/lib/demo-data";
+import { get, set } from "idb-keyval";
 
 const STORAGE_KEY = "vaanishiksha_saved_lessons_v1";
 
-export function getSavedLessons(): SavedLesson[] {
+export async function getSavedLessons(): Promise<SavedLesson[]> {
   if (typeof window === "undefined") return [];
 
   try {
-    const data = localStorage.getItem(STORAGE_KEY);
-    if (!data) {
+    const data = await get<SavedLesson[]>(STORAGE_KEY);
+    if (!data || !Array.isArray(data)) {
       // Seed initial demo lesson if library is empty
       const initial = [DEMO_SAVED_LESSON];
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(initial));
+      await set(STORAGE_KEY, initial);
       return initial;
     }
-    const parsed: SavedLesson[] = JSON.parse(data);
-    return Array.isArray(parsed) ? parsed : [DEMO_SAVED_LESSON];
+    return data;
   } catch (err) {
-    console.error("Error reading saved lessons from localStorage:", err);
+    console.error("Error reading saved lessons from IndexedDB:", err);
     return [DEMO_SAVED_LESSON];
   }
 }
 
-export function getSavedLessonById(id: string): SavedLesson | null {
-  const lessons = getSavedLessons();
+export async function getSavedLessonById(id: string): Promise<SavedLesson | null> {
+  const lessons = await getSavedLessons();
   return lessons.find((l) => l.id === id) || null;
 }
 
-export function saveLessonToLibrary(kit: LearningKit, existingId?: string): SavedLesson {
-  const lessons = getSavedLessons();
+export async function saveLessonToLibrary(kit: LearningKit, existingId?: string): Promise<SavedLesson> {
+  const lessons = await getSavedLessons();
   const now = new Date().toISOString();
 
   const status = kit.verificationStatus || (kit.quality.reviewRequired ? "needs_review" : "ai_generated");
@@ -51,7 +51,7 @@ export function saveLessonToLibrary(kit: LearningKit, existingId?: string): Save
         },
       };
       lessons[idx] = updatedLesson;
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(lessons));
+      await set(STORAGE_KEY, lessons);
       return updatedLesson;
     }
   }
@@ -77,24 +77,24 @@ export function saveLessonToLibrary(kit: LearningKit, existingId?: string): Save
   };
 
   lessons.unshift(newSavedLesson);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(lessons));
+  await set(STORAGE_KEY, lessons);
   return newSavedLesson;
 }
 
-export function updateSavedLesson(id: string, kit: LearningKit): SavedLesson | null {
-  return saveLessonToLibrary(kit, id);
+export async function updateSavedLesson(id: string, kit: LearningKit): Promise<SavedLesson | null> {
+  return await saveLessonToLibrary(kit, id);
 }
 
-export function deleteSavedLesson(id: string): boolean {
+export async function deleteSavedLesson(id: string): Promise<boolean> {
   if (typeof window === "undefined") return false;
 
   try {
-    const lessons = getSavedLessons();
+    const lessons = await getSavedLessons();
     const filtered = lessons.filter((l) => l.id !== id);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
+    await set(STORAGE_KEY, filtered);
     return true;
   } catch (err) {
-    console.error("Error deleting lesson from localStorage:", err);
+    console.error("Error deleting lesson from IndexedDB:", err);
     return false;
   }
 }

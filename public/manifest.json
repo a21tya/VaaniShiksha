@@ -1,0 +1,16 @@
+{
+  "name": "VaaniShiksha",
+  "short_name": "VaaniShiksha",
+  "description": "AI-Powered Vernacular Pedagogy and Real-Time Translation Tool for Mother Tongue-Based Primary Education.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fcfbf9",
+  "theme_color": "#fcfbf9",
+  "icons": [
+    {
+      "src": "/globe.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    }
+  ]
+}
