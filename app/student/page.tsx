@@ -4,6 +4,7 @@ import { useEffect, useState, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import PageContainer from "@/components/PageContainer";
+import SanthaliAudioButton from "@/components/SanthaliAudioButton";
 import { LearningKit, SavedLesson } from "@/types/lesson";
 import { getSavedLessonById } from "@/lib/storage";
 import { DEMO_LEARNING_KIT } from "@/lib/demo-data";
@@ -161,6 +162,11 @@ function StudentModeContent() {
               <p className="font-santhali font-bold text-emerald-950 text-xl sm:text-2xl leading-relaxed">
                 {kit.lesson.santhali}
               </p>
+              <SanthaliAudioButton
+                text={kit.lesson.santhali}
+                lessonId={savedLesson?.id || "demo-lesson"}
+                audioId={`lesson-story-${savedLesson?.id || "demo-lesson"}`}
+              />
               {kit.lesson.romanization && (
                 <p className="text-xs sm:text-sm text-emerald-800 pt-1">
                   <strong>Pronunciation:</strong> {kit.lesson.romanization}
