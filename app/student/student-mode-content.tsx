@@ -149,13 +149,12 @@ export default function StudentModeContent({ lessonId: serverLessonId }: { lesso
                 key={step.id}
                 type="button"
                 onClick={() => setCurrentStep(step.id)}
-                className={`py-2.5 sm:py-3 px-1 rounded-xl text-xs sm:text-sm font-bold transition-all flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 ${
-                  isActive
+                className={`py-2.5 sm:py-3 px-1 rounded-xl text-xs sm:text-sm font-bold transition-all flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 ${isActive
                     ? "bg-emerald-700 text-white shadow-xs"
                     : isCompleted
-                    ? "bg-emerald-50 text-emerald-900 border border-emerald-200"
-                    : "bg-slate-50 text-slate-600 hover:bg-slate-100"
-                }`}
+                      ? "bg-emerald-50 text-emerald-900 border border-emerald-200"
+                      : "bg-slate-50 text-slate-600 hover:bg-slate-100"
+                  }`}
               >
                 <span className="text-base sm:text-lg">{step.icon}</span>
                 <span className="hidden xs:inline sm:inline">{step.name}</span>

@@ -62,10 +62,10 @@ export default function StudentCatalogPage() {
               📖
             </div>
             <div className="space-y-1">
-               <h3 className="text-lg font-bold text-slate-900">No Lessons Yet</h3>
-               <p className="text-sm text-slate-600 max-w-md mx-auto">
-                 Ask your teacher to create some lessons for you!
-               </p>
+              <h3 className="text-lg font-bold text-slate-900">No Lessons Yet</h3>
+              <p className="text-sm text-slate-600 max-w-md mx-auto">
+                Ask your teacher to create some lessons for you!
+              </p>
             </div>
           </div>
         ) : (

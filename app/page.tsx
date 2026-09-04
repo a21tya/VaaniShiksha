@@ -188,7 +188,7 @@ export default function Home() {
               Automatically generates primary grade vocabulary lists, comprehension checks, and story adaptations from raw teacher notes.
             </p>
             <span className="inline-block text-xs font-semibold text-slate-100 bg-slate-800 px-2.5 py-1 rounded-md">
-              ⚡ Live Gemini AI Pipeline
+              ⚡ Live AI Pipeline
             </span>
           </div>
 
@@ -243,11 +243,12 @@ export default function Home() {
       </section>
 
       {/* Prototype Notice */}
-      <div className="text-center p-4 bg-emerald-50 rounded-xl border border-emerald-200 text-xs sm:text-sm text-emerald-900">
-        <p>
-          💡 <strong>SIH Demo Ready:</strong> The backend AI engines (Google Gemini) and live Santhali TTS endpoints are fully connected and active.
-        </p>
-      </div>
+      <div className="max-w-2xl mx-auto text-center mt-12 bg-orange-50 p-6 rounded-2xl border border-orange-200/60 shadow-sm relative overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-br from-orange-100/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+          <p className="text-sm text-slate-700 font-medium relative z-10 leading-relaxed">
+            💡 <strong>SIH Demo Ready:</strong> The backend AI engines and live Santhali TTS endpoints are fully connected and active.
+          </p>
+        </div>
     </PageContainer>
   );
 }

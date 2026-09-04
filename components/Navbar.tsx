@@ -56,11 +56,10 @@ export default function Navbar() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-all duration-150 ${
-                    isActive
+                  className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-all duration-150 ${isActive
                       ? "bg-amber-100 text-amber-950 font-semibold shadow-2xs"
                       : "text-slate-700 hover:text-slate-900 hover:bg-slate-100/80"
-                  }`}
+                    }`}
                   aria-current={isActive ? "page" : undefined}
                 >
                   {item.label}
@@ -124,11 +123,10 @@ export default function Navbar() {
                   key={item.href}
                   href={item.href}
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`block px-4 py-2.5 rounded-lg text-base font-medium transition-colors ${
-                    isActive
+                  className={`block px-4 py-2.5 rounded-lg text-base font-medium transition-colors ${isActive
                       ? "bg-amber-100 text-amber-950 font-semibold"
                       : "text-slate-800 hover:bg-slate-50"
-                  }`}
+                    }`}
                   aria-current={isActive ? "page" : undefined}
                 >
                   {item.label}

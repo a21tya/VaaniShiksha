@@ -65,10 +65,10 @@ export default function SantaliAudioButton({
         disabled={status === "loading"}
         className="px-4 py-2 rounded-xl bg-emerald-700 text-white text-sm font-bold hover:bg-emerald-800 disabled:cursor-wait disabled:opacity-70"
       >
-        {status === "loading" ? "Generating audio…" : "🔊 Listen in Santali"}
+        {status === "loading" ? "Generating audio…" : "🔊 Listen in Santhali"}
       </button>
       <div className="mt-2 text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider pl-1">
-        ⚡ Powered by Custom Colab TTS API
+        ⚡ Santhali Audio (Local Cache &amp; Offline Engine)
       </div>
       {error && <p role="alert" className="mt-2 text-xs font-semibold text-red-700">{error}</p>}
       {audioUrl && (

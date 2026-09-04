@@ -29,13 +29,13 @@ function CreateLessonForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [saveSuccessMessage, setSaveSuccessMessage] = useState<string | null>(null);
-  
+
   // Learning Kit State
   const [learningKit, setLearningKit] = useState<LearningKit | null>(null);
-  
+
   // Offline status
   const isOnline = useNetworkStatus();
-  
+
   // Teacher Review & Verification States
   const [isEditing, setIsEditing] = useState(false);
   const [editableKit, setEditableKit] = useState<LearningKit | null>(null);
@@ -201,8 +201,8 @@ function CreateLessonForm() {
         <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
           Create Mother-Tongue Lesson Kit
         </h1>
-        <p className="text-sm sm:text-base text-slate-600 mt-1">
-          Provide standard textbook material in Hindi to generate Santhali pedagogical adaptations powered by Gemini 3.6 Flash.
+        <p className="text-sm text-slate-600 max-w-2xl mt-1 leading-relaxed font-medium">
+          Provide standard textbook material in Hindi to generate Santhali pedagogical adaptations powered by our AI pipeline.
         </p>
       </div>
 
@@ -320,47 +320,46 @@ function CreateLessonForm() {
           <div className="w-full sm:w-auto flex flex-col gap-2">
             <button
               type="submit"
-            disabled={isLoading || !isOnline}
-            className={`w-full sm:w-auto px-8 py-3.5 rounded-xl font-semibold text-sm sm:text-base shadow-xs transition-all flex items-center justify-center gap-2.5 ${
-              isLoading || !isOnline
-                ? "bg-slate-300 text-slate-500 cursor-not-allowed"
-                : "bg-amber-600 text-white hover:bg-amber-700 active:scale-98"
-            }`}
-          >
-            {isLoading ? (
-              <>
-                <svg
-                  className="animate-spin h-5 w-5 text-amber-950"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  />
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  />
-                </svg>
-                <span>Translating Hindi to Santhali Ol Chiki via Gemini AI...</span>
-              </>
-            ) : (
-              <>
-                <span>✨ Generate Learning Kit</span>
-              </>
-            )}
-          </button>
-          <span className="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider text-center sm:text-left pl-1">⚡ Powered by Google Gemini AI</span>
-        </div>
+              disabled={isLoading || !isOnline}
+              className={`w-full sm:w-auto px-8 py-3.5 rounded-xl font-semibold text-sm sm:text-base shadow-xs transition-all flex items-center justify-center gap-2.5 ${isLoading || !isOnline
+                  ? "bg-slate-300 text-slate-500 cursor-not-allowed"
+                  : "bg-amber-600 text-white hover:bg-amber-700 active:scale-98"
+                }`}
+            >
+              {isLoading ? (
+                <>
+                  <svg
+                    className="animate-spin h-5 w-5 text-amber-950"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    />
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    />
+                  </svg>
+                  <span>Translating Hindi to Santhali Ol Chiki via AI engine...</span>
+                </>
+              ) : (
+                <>
+                  <span>✨ Generate Learning Kit</span>
+                </>
+              )}
+            </button>
+            <span className="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider text-center sm:text-left pl-1">⚡ Powered by Automated AI Pipeline</span>
+          </div>
 
-        <Link
+          <Link
             href="/lessons"
             className="text-xs sm:text-sm font-medium text-slate-600 hover:text-slate-900"
           >
@@ -383,7 +382,7 @@ function CreateLessonForm() {
       {/* Generated Learning Kit & Teacher Review Section */}
       {learningKit && (
         <div id="generated-kit-section" className="flex flex-col gap-8 pt-4">
-          
+
           {/* Save Success Banner */}
           {saveSuccessMessage && (
             <div className="bg-emerald-50 border border-emerald-300 text-emerald-950 p-4 rounded-2xl flex items-center justify-between gap-3 text-xs sm:text-sm shadow-2xs">
@@ -481,13 +480,12 @@ function CreateLessonForm() {
                     AI Confidence:
                   </span>
                   <span
-                    className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${
-                      learningKit.quality.confidence === "high"
+                    className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${learningKit.quality.confidence === "high"
                         ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
                         : learningKit.quality.confidence === "medium"
-                        ? "bg-amber-100 text-amber-800 border border-amber-300"
-                        : "bg-red-100 text-red-800 border border-red-300"
-                    }`}
+                          ? "bg-amber-100 text-amber-800 border border-amber-300"
+                          : "bg-red-100 text-red-800 border border-red-300"
+                      }`}
                   >
                     {learningKit.quality.confidence}
                   </span>
@@ -506,8 +504,8 @@ function CreateLessonForm() {
                   {isEditing
                     ? "Editing Mode Active: Modify Santhali translations, vocabulary, or quiz questions below."
                     : learningKit.verificationStatus === "verified"
-                    ? "This lesson kit has been reviewed and verified by a teacher for classroom presentation."
-                    : "Review AI translations below, make any corrections, and click 'Approve & Verify'."}
+                      ? "This lesson kit has been reviewed and verified by a teacher for classroom presentation."
+                      : "Review AI translations below, make any corrections, and click 'Approve & Verify'."}
                 </span>
               </div>
 
@@ -642,9 +640,9 @@ function CreateLessonForm() {
                       setEditableKit((prev) =>
                         prev
                           ? {
-                              ...prev,
-                              lesson: { ...prev.lesson, hindi: e.target.value },
-                            }
+                            ...prev,
+                            lesson: { ...prev.lesson, hindi: e.target.value },
+                          }
                           : null
                       )
                     }
@@ -670,9 +668,9 @@ function CreateLessonForm() {
                       setEditableKit((prev) =>
                         prev
                           ? {
-                              ...prev,
-                              lesson: { ...prev.lesson, santhali: e.target.value },
-                            }
+                            ...prev,
+                            lesson: { ...prev.lesson, santhali: e.target.value },
+                          }
                           : null
                       )
                     }
@@ -694,9 +692,9 @@ function CreateLessonForm() {
                         setEditableKit((prev) =>
                           prev
                             ? {
-                                ...prev,
-                                lesson: { ...prev.lesson, romanization: e.target.value },
-                              }
+                              ...prev,
+                              lesson: { ...prev.lesson, romanization: e.target.value },
+                            }
                             : null
                         )
                       }
@@ -722,9 +720,9 @@ function CreateLessonForm() {
                     setEditableKit((prev) =>
                       prev
                         ? {
-                            ...prev,
-                            lesson: { ...prev.lesson, simpleExplanation: e.target.value },
-                          }
+                          ...prev,
+                          lesson: { ...prev.lesson, simpleExplanation: e.target.value },
+                        }
                         : null
                     )
                   }
@@ -1115,9 +1113,9 @@ function CreateLessonForm() {
                       setEditableKit((prev) =>
                         prev
                           ? {
-                              ...prev,
-                              activity: { ...prev.activity, title: e.target.value },
-                            }
+                            ...prev,
+                            activity: { ...prev.activity, title: e.target.value },
+                          }
                           : null
                       )
                     }
@@ -1139,9 +1137,9 @@ function CreateLessonForm() {
                   setEditableKit((prev) =>
                     prev
                       ? {
-                          ...prev,
-                          activity: { ...prev.activity, instructions: e.target.value },
-                        }
+                        ...prev,
+                        activity: { ...prev.activity, instructions: e.target.value },
+                      }
                       : null
                   )
                 }
