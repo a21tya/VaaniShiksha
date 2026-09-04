@@ -295,7 +295,14 @@ export async function POST(request: NextRequest): Promise<NextResponse<GenerateL
       );
     }
 
-    const { lessonText, grade, subject, targetLanguage } = body;
+    const { title, lessonText, grade, subject, targetLanguage } = body;
+
+    if (!title || typeof title !== "string" || !title.trim()) {
+      return NextResponse.json(
+        { success: false, error: "Missing or empty required field: 'title'." },
+        { status: 400 }
+      );
+    }
 
     if (!lessonText || typeof lessonText !== "string" || !lessonText.trim()) {
       return NextResponse.json(
@@ -663,6 +670,11 @@ Generate a complete, structured JSON response adhering strictly to the schema.
     }
 
     const { valid, warnings, kit: learningKit } = validateAndRepairLearningKit(rawParsed);
+
+    // Hardcode metadata from the teacher to prevent AI hallucinations
+    learningKit.title = title.trim();
+    learningKit.grade = grade.trim();
+    learningKit.subject = subject.trim();
 
     if (warnings.length > 0) {
       console.warn(`[Gemini API] Validation produced ${warnings.length} warning(s):`, warnings);

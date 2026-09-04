@@ -79,6 +79,7 @@ function CreateLessonForm() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
+          title,
           lessonText: content,
           grade,
           subject,
@@ -316,8 +317,9 @@ function CreateLessonForm() {
         )}
 
         <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <button
-            type="submit"
+          <div className="w-full sm:w-auto flex flex-col gap-2">
+            <button
+              type="submit"
             disabled={isLoading || !isOnline}
             className={`w-full sm:w-auto px-8 py-3.5 rounded-xl font-semibold text-sm sm:text-base shadow-xs transition-all flex items-center justify-center gap-2.5 ${
               isLoading || !isOnline
@@ -347,7 +349,7 @@ function CreateLessonForm() {
                     d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                   />
                 </svg>
-                <span>Generating Santhali Learning Kit...</span>
+                <span>Translating Hindi to Santhali Ol Chiki via Gemini AI...</span>
               </>
             ) : (
               <>
@@ -355,8 +357,10 @@ function CreateLessonForm() {
               </>
             )}
           </button>
+          <span className="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider text-center sm:text-left pl-1">⚡ Powered by Google Gemini AI</span>
+        </div>
 
-          <Link
+        <Link
             href="/lessons"
             className="text-xs sm:text-sm font-medium text-slate-600 hover:text-slate-900"
           >

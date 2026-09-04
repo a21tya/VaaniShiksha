@@ -67,6 +67,9 @@ export default function SantaliAudioButton({
       >
         {status === "loading" ? "Generating audio…" : "🔊 Listen in Santali"}
       </button>
+      <div className="mt-2 text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider pl-1">
+        ⚡ Powered by Custom Colab TTS API
+      </div>
       {error && <p role="alert" className="mt-2 text-xs font-semibold text-red-700">{error}</p>}
       {audioUrl && (
         <audio controls autoPlay src={audioUrl} className="mt-3 w-full">

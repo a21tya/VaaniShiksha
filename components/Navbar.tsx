@@ -11,7 +11,7 @@ const NAV_ITEMS = [
   { label: "Teacher Dashboard", href: "/teacher" },
   { label: "Create Lesson", href: "/create-lesson" },
   { label: "Lesson Library", href: "/lessons" },
-  { label: "Student Mode", href: "/student" },
+  { label: "Student Mode", href: "/student/catalog" },
 ];
 
 export default function Navbar() {
@@ -78,7 +78,7 @@ export default function Navbar() {
               Teacher Access
             </Link>
             <Link
-              href="/student"
+              href="/student/catalog"
               className="px-3.5 py-1.5 text-xs font-semibold text-emerald-900 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-full transition-colors"
             >
               Student Portal
@@ -144,7 +144,7 @@ export default function Navbar() {
                 Teacher Dashboard
               </Link>
               <Link
-                href="/student"
+                href="/student/catalog"
                 onClick={() => setMobileMenuOpen(false)}
                 className="flex-1 text-center py-2 text-xs font-semibold text-emerald-900 bg-emerald-50 rounded-lg border border-emerald-200"
               >

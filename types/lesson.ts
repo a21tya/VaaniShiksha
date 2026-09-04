@@ -79,6 +79,7 @@ export interface SavedLesson {
 }
 
 export interface GenerateLessonRequest {
+  title: string;
   lessonText: string;
   grade: string;
   subject: string;

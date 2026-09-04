@@ -104,7 +104,7 @@ export const DEMO_LEARNING_KIT: LearningKit = {
 };
 
 export const DEMO_SAVED_LESSON: SavedLesson = {
-  id: "demo-plants-around-us",
+  id: "demo-plants",
   title: DEMO_LEARNING_KIT.title,
   grade: DEMO_LEARNING_KIT.grade,
   subject: DEMO_LEARNING_KIT.subject,
@@ -114,4 +114,178 @@ export const DEMO_SAVED_LESSON: SavedLesson = {
   updatedAt: new Date().toISOString(),
   verificationStatus: "ai_generated",
   kit: DEMO_LEARNING_KIT,
+};
+
+export const DEMO_SAVED_LESSON_COUNTING: SavedLesson = {
+  id: "demo-counting",
+  title: "Numbers 1–20 (संख्याएँ 1 से 20)",
+  grade: "Grade 1",
+  subject: "Mathematics",
+  sourceLanguage: "Hindi",
+  targetLanguage: "Santhali",
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+  verificationStatus: "ai_generated",
+  kit: {
+    title: "Numbers 1–20 (संख्याएँ 1 से 20)",
+    sourceLanguage: "Hindi",
+    targetLanguage: "Santhali",
+    grade: "Grade 1",
+    subject: "Mathematics",
+    verificationStatus: "ai_generated",
+    lesson: {
+      hindi: "आज हम एक से बीस तक की संख्याएँ सीखेंगे।",
+      santhali: "ᱛᱮᱦᱮᱧ ᱟᱵᱚ ᱢᱤᱫ ᱠᱷᱚᱱ ᱵᱟᱨᱜᱮᱞ ᱫᱷᱟᱹᱵᱤᱡ ᱮᱞᱠᱷᱟ ᱵᱚᱱ ᱪᱮᱫᱚᱜ-ᱟ᱾",
+      romanization: "Teheñ abo mid khon bargel dhäbij elkha bon chedog-a.",
+      simpleExplanation: "गिनती सीखना गणित का पहला कदम है।",
+    },
+    vocabulary: [
+      {
+        hindi: "एक (Ek)",
+        santhali: "ᱢᱤᱫ",
+        romanization: "Mid",
+        meaning: "The number one.",
+      },
+      {
+        hindi: "दो (Do)",
+        santhali: "ᱵᱟᱨ",
+        romanization: "Bar",
+        meaning: "The number two.",
+      },
+      {
+        hindi: "तीन (Teen)",
+        santhali: "ᱯᱮ",
+        romanization: "Pe",
+        meaning: "The number three.",
+      },
+      {
+        hindi: "चार (Char)",
+        santhali: "ᱯᱩᱱ",
+        romanization: "Pun",
+        meaning: "The number four.",
+      },
+    ],
+    flashcards: [
+      {
+        front: "एक को संथाली (Ol Chiki) में क्या कहते हैं?",
+        back: "ᱢᱤᱫ (Mid) - One",
+      },
+      {
+        front: "दो को संथाली (Ol Chiki) में क्या कहते हैं?",
+        back: "ᱵᱟᱨ (Bar) - Two",
+      },
+      {
+        front: "तीन को संथाली (Ol Chiki) में क्या कहते हैं?",
+        back: "ᱯᱮ (Pe) - Three",
+      },
+    ],
+    quiz: [
+      {
+        question: "संथाली में 'दो' (Two) को क्या कहते हैं?",
+        options: ["ᱢᱤᱫ (Mid)", "ᱵᱟᱨ (Bar)", "ᱯᱮ (Pe)", "ᱯᱩᱱ (Pun)"],
+        correctAnswer: "ᱵᱟᱨ (Bar)",
+      },
+      {
+        question: "'ᱢᱤᱫ' (Mid) का अर्थ क्या है?",
+        options: ["एक (1)", "दो (2)", "तीन (3)", "चार (4)"],
+        correctAnswer: "एक (1)",
+      },
+    ],
+    activity: {
+      title: "Counting Challenge",
+      instructions: "1. Find 3 identical items in the classroom (e.g. pencils).\n2. Count them aloud in Santhali for your teacher!",
+    },
+    quality: {
+      reviewRequired: true,
+      confidence: "high",
+      reviewNotes: "Standard numbers 1-4 in Santhali.",
+    }
+  },
+};
+
+export const DEMO_SAVED_LESSON_ANIMALS: SavedLesson = {
+  id: "demo-animals",
+  title: "Animals Around Us (हमारे आसपास के जानवर)",
+  grade: "Grade 3",
+  subject: "Science",
+  sourceLanguage: "Hindi",
+  targetLanguage: "Santhali",
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+  verificationStatus: "ai_generated",
+  kit: {
+    title: "Animals Around Us (हमारे आसपास के जानवर)",
+    sourceLanguage: "Hindi",
+    targetLanguage: "Santhali",
+    grade: "Grade 3",
+    subject: "Science",
+    verificationStatus: "ai_generated",
+    lesson: {
+      hindi: "हमारे आसपास कई जानवर होते हैं, जैसे कुत्ता, बिल्ली, और गाय।",
+      santhali: "ᱟᱵᱚ ᱯᱟᱦᱴᱟ ᱨᱮ ᱟᱭᱢᱟ ᱡᱟᱱᱣᱟᱨ ᱢᱮᱱᱟᱜ ᱠᱚᱣᱟ, ᱡᱮᱞᱮᱠᱟ ᱥᱮᱛᱟ, ᱯᱩᱥᱤ, ᱟᱨ ᱜᱟᱹᱭ᱾",
+      romanization: "Abo pahta re aima janwar menag kowa, jeleka seta, pusi, ar gäy.",
+      simpleExplanation: "जानवर हमारे पर्यावरण का महत्वपूर्ण हिस्सा हैं।",
+    },
+    vocabulary: [
+      {
+        hindi: "कुत्ता (Kutta)",
+        santhali: "ᱥᱮᱛᱟ",
+        romanization: "Seta",
+        meaning: "A common pet animal, dog.",
+      },
+      {
+        hindi: "बिल्ली (Billi)",
+        santhali: "ᱯᱩᱥᱤ",
+        romanization: "Pusi",
+        meaning: "A small pet animal, cat.",
+      },
+      {
+        hindi: "गाय (Gaay)",
+        santhali: "ᱜᱟᱹᱭ",
+        romanization: "Gay",
+        meaning: "A farm animal that gives milk, cow.",
+      },
+      {
+        hindi: "पक्षी (Pakshi)",
+        santhali: "ᱪᱮᱬᱮ",
+        romanization: "Cene",
+        meaning: "Animals that can fly, bird.",
+      },
+    ],
+    flashcards: [
+      {
+        front: "कुत्ते को संथाली (Ol Chiki) में क्या कहते हैं?",
+        back: "ᱥᱮᱛᱟ (Seta) - Dog",
+      },
+      {
+        front: "बिल्ली को संथाली (Ol Chiki) में क्या कहते हैं?",
+        back: "ᱯᱩᱥᱤ (Pusi) - Cat",
+      },
+      {
+        front: "गाय को संथाली (Ol Chiki) में क्या कहते हैं?",
+        back: "ᱜᱟᱹᱭ (Gay) - Cow",
+      },
+    ],
+    quiz: [
+      {
+        question: "कुत्ते को संथाली में क्या कहते हैं?",
+        options: ["ᱯᱩᱥᱤ (Pusi)", "ᱥᱮᱛᱟ (Seta)", "ᱜᱟᱹᱭ (Gay)", "ᱪᱮᱬᱮ (Cene)"],
+        correctAnswer: "ᱥᱮᱛᱟ (Seta)",
+      },
+      {
+        question: "'ᱜᱟᱹᱭ' (Gay) का अर्थ क्या है?",
+        options: ["बिल्ली", "कुत्ता", "गाय", "पक्षी"],
+        correctAnswer: "गाय",
+      },
+    ],
+    activity: {
+      title: "Animal Sounds & Names",
+      instructions: "1. Draw your favorite animal from today's lesson.\n2. Write its Santhali name under the drawing and make its sound!",
+    },
+    quality: {
+      reviewRequired: true,
+      confidence: "high",
+      reviewNotes: "Common domestic animals in Santhali.",
+    }
+  },
 };

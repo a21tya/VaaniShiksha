@@ -14,7 +14,7 @@ const DEMO_LESSONS = [
     targetLang: "Santhali",
     status: "Verified" as const,
     activityCount: 8,
-    studentUrl: "/student",
+    studentUrl: "/student?id=demo-plants",
   },
   {
     id: "2",
@@ -25,7 +25,7 @@ const DEMO_LESSONS = [
     targetLang: "Santhali",
     status: "Verified" as const,
     activityCount: 10,
-    studentUrl: "/student",
+    studentUrl: "/student?id=demo-counting",
   },
   {
     id: "3",
@@ -36,7 +36,7 @@ const DEMO_LESSONS = [
     targetLang: "Santhali",
     status: "Draft" as const,
     activityCount: 6,
-    studentUrl: "/student",
+    studentUrl: "/student?id=demo-animals",
   },
 ];
 

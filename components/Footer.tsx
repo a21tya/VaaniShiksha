@@ -45,7 +45,7 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/student" className="hover:text-amber-300 transition-colors">
+                <Link href="/student/catalog" className="hover:text-amber-300 transition-colors">
                   Student Mode (Plants Around Us)
                 </Link>
               </li>

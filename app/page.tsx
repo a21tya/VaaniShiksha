@@ -53,7 +53,7 @@ export default function Home() {
         </p>
 
         <p className="text-base sm:text-lg text-slate-700 max-w-3xl mx-auto leading-relaxed">
-          VaaniShiksha helps teachers turn ordinary curriculum content into learning material children can understand in their familiar mother tongue, ensuring every child builds a strong foundation in early primary school.
+          VaaniShiksha empowers rural teachers to automatically adapt standard curriculum into interactive, localized lessons. By bridging the language gap, we help tribal students transition into formal education using their mother tongue, preventing early dropout and building foundational literacy.
         </p>
 
         {/* Primary Action Buttons */}
@@ -67,7 +67,7 @@ export default function Home() {
           </Link>
 
           <Link
-            href="/student"
+            href="/student/catalog"
             className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-emerald-700 text-white font-semibold text-base shadow-xs hover:bg-emerald-800 transition-all transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2 group"
           >
             <span>Student Mode</span>
@@ -155,7 +155,7 @@ export default function Home() {
             Key Platform Capabilities
           </h2>
           <p className="text-sm text-slate-600">
-            Planned prototype features for mother-tongue primary education
+            Live features driving mother-tongue primary education
           </p>
         </div>
 
@@ -187,8 +187,8 @@ export default function Home() {
             <p className="text-sm text-slate-600 leading-relaxed">
               Automatically generates primary grade vocabulary lists, comprehension checks, and story adaptations from raw teacher notes.
             </p>
-            <span className="inline-block text-xs font-semibold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-md">
-              Planned AI Pipeline
+            <span className="inline-block text-xs font-semibold text-slate-100 bg-slate-800 px-2.5 py-1 rounded-md">
+              ⚡ Live Gemini AI Pipeline
             </span>
           </div>
 
@@ -243,9 +243,9 @@ export default function Home() {
       </section>
 
       {/* Prototype Notice */}
-      <div className="text-center p-4 bg-slate-100 rounded-xl border border-slate-200 text-xs sm:text-sm text-slate-600">
+      <div className="text-center p-4 bg-emerald-50 rounded-xl border border-emerald-200 text-xs sm:text-sm text-emerald-900">
         <p>
-          💡 <strong>Prototype Notice:</strong> Features listed above reflect the planned product architecture. In this initial stage, backend AI engines and live translation APIs remain disconnected.
+          💡 <strong>SIH Demo Ready:</strong> The backend AI engines (Google Gemini) and live Santhali TTS endpoints are fully connected and active.
         </p>
       </div>
     </PageContainer>

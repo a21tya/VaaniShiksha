@@ -1,5 +1,5 @@
 import { LearningKit, SavedLesson, AudioRecord } from "@/types/lesson";
-import { DEMO_SAVED_LESSON } from "@/lib/demo-data";
+import { DEMO_SAVED_LESSON, DEMO_SAVED_LESSON_COUNTING, DEMO_SAVED_LESSON_ANIMALS } from "@/lib/demo-data";
 import { get, set, createStore, del, keys } from "idb-keyval";
 
 const STORAGE_KEY = "vaanishiksha_saved_lessons_v1";
@@ -32,6 +32,9 @@ export async function getSavedLessons(): Promise<SavedLesson[]> {
 }
 
 export async function getSavedLessonById(id: string): Promise<SavedLesson | null> {
+  if (id === "demo-plants" || id === "demo-plants-around-us") return DEMO_SAVED_LESSON;
+  if (id === "demo-counting") return DEMO_SAVED_LESSON_COUNTING;
+  if (id === "demo-animals") return DEMO_SAVED_LESSON_ANIMALS;
   const lessons = await getSavedLessons();
   return lessons.find((l) => l.id === id) || null;
 }
