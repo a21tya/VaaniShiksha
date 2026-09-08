@@ -46,3 +46,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 public/sw.js
+
+# Local speech dependencies and model weights
+tts_service/.venv/
+tts_service/venv/
+tts_service/models/
+__pycache__/

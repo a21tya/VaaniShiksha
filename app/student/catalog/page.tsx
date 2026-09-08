@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import PageContainer from "@/components/PageContainer";
+import PageHeading from "@/components/PageHeading";
 import { SavedLesson } from "@/types/lesson";
 import { getSavedLessons } from "@/lib/storage";
 
@@ -39,20 +40,7 @@ export default function StudentCatalogPage() {
 
   return (
     <PageContainer className="flex flex-col gap-8">
-      {/* Header Banner */}
-      <div className="bg-gradient-to-r from-emerald-600 to-teal-700 rounded-3xl p-6 md:p-8 shadow-md flex flex-col md:flex-row md:items-center justify-between gap-6 text-white">
-        <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 text-white text-xs sm:text-sm font-semibold mb-2">
-            <span>🎒 Student Dashboard</span>
-          </div>
-          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-            My Lessons
-          </h1>
-          <p className="text-emerald-100 text-sm sm:text-base mt-2 font-medium">
-            Choose a lesson to start learning in Santhali!
-          </p>
-        </div>
-      </div>
+      <PageHeading eyebrow="A new discovery, in every lesson." title={<>A world of <span>learning awaits.</span></>} description="Choose a story. Discover new words. Learn something wonderful in your own language."/>
 
       {/* Lessons List Section */}
       <div className="space-y-4">

@@ -6,12 +6,12 @@ import path from "path";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const TIMEOUT_MS = 15_000;
+const TIMEOUT_MS = 600_000;
 const MAX_CHARS = 800;
 
 export async function POST(request: NextRequest) {
-  const serviceUrl = (process.env.TTS_SERVICE_URL || "http://127.0.0.1:8000").replace(/\/$/, "");
-  const apiKey = process.env.TTS_SERVICE_API_KEY || "local_offline_key";
+  const serviceUrl = "http://127.0.0.1:8000";
+
 
 
   let text: unknown;
@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
   const textStr = text.trim();
 
   // Create hash for caching
-  const hash = crypto.createHash("md5").update(textStr).digest("hex");
+  const hash = crypto.createHash("sha256").update("indic-parler-v1:" + textStr).digest("hex");
   const cacheDir = path.join(process.cwd(), "public", "audio_cache");
   const cacheFile = path.join(cacheDir, `${hash}.wav`);
 
@@ -61,7 +61,6 @@ export async function POST(request: NextRequest) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-API-Key": apiKey,
       },
       body: JSON.stringify({ text: text.trim() }),
       signal: controller.signal,
@@ -70,7 +69,7 @@ export async function POST(request: NextRequest) {
 
     if (!upstream.ok) {
       const requestId = upstream.headers.get("x-request-id");
-      const status = upstream.status === 401 ? 502 : upstream.status === 503 ? 503 : 502;
+      const status = upstream.status === 401 ? 502 : upstream.status === 503 ? 503 : upstream.status === 429 ? 429 : 502;
       console.error("Santhali TTS upstream failure", {
         status: upstream.status,
         requestId,
@@ -97,14 +96,15 @@ export async function POST(request: NextRequest) {
 
     const arrayBuffer = await upstream.arrayBuffer();
 
-    // Save to cache asynchronously without blocking the response
-    fs.mkdir(cacheDir, { recursive: true }).then(() => {
-      fs.writeFile(cacheFile, Buffer.from(arrayBuffer)).catch(err => {
-        console.error("Failed to write TTS cache file:", err);
-      });
-    }).catch(err => {
-        console.error("Failed to create TTS cache directory:", err);
-    });
+    // Finish the atomic disk write before returning so offline reuse is reliable.
+    try {
+      await fs.mkdir(cacheDir, { recursive: true });
+      const temporaryFile = `${cacheFile}.${crypto.randomUUID()}.tmp`;
+      await fs.writeFile(temporaryFile, Buffer.from(arrayBuffer));
+      await fs.rename(temporaryFile, cacheFile);
+    } catch (error) {
+      console.error("Failed to cache speech:", error);
+    }
 
     return new NextResponse(arrayBuffer, {
       status: 200,
@@ -117,7 +117,7 @@ export async function POST(request: NextRequest) {
       {
         error: timedOut
           ? "Audio generation took too long. Please try again."
-          : "Audio service is offline. Please try again later.",
+          : "Start the local voice service with npm run dev:local.",
       },
       { status: 503 },
     );

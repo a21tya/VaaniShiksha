@@ -50,6 +50,8 @@ export async function saveLessonToLibrary(kit: LearningKit, existingId?: string)
     if (idx !== -1) {
       const updatedLesson: SavedLesson = {
         ...lessons[idx],
+        sourceLanguage: kit.sourceLanguage,
+        targetLanguage: kit.targetLanguage,
         title: kit.title,
         grade: kit.grade,
         subject: kit.subject,

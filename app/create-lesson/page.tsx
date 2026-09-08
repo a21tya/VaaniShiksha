@@ -4,6 +4,8 @@ import { useEffect, useState, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import PageContainer from "@/components/PageContainer";
+import PageHeading from "@/components/PageHeading";
+import SpeechInput from "@/components/SpeechInput";
 import LanguageSelector from "@/components/LanguageSelector";
 import { LearningKit, GenerateLessonResponse } from "@/types/lesson";
 import {
@@ -17,13 +19,13 @@ function CreateLessonForm() {
   const lessonIdParam = searchParams.get("id");
 
   const [currentLessonId, setCurrentLessonId] = useState<string | null>(lessonIdParam);
-  const [title, setTitle] = useState("Plants Around Us (हमारे आसपास के पौधे)");
+  const [title, setTitle] = useState("Plants Around Us");
   const [grade, setGrade] = useState("Grade 2");
   const [subject, setSubject] = useState("Environmental Studies");
-  const [sourceLang, setSourceLang] = useState("Hindi");
-  const [targetLang, setTargetLang] = useState("Santhali");
+  const [sourceLang, setSourceLang] = useState("English");
+  const [targetLang, setTargetLang] = useState("English");
   const [content, setContent] = useState(
-    "हमारे आसपास कई प्रकार के पौधे पाए जाते हैं। पौधों के मुख्य भाग होते हैं: जड़, तना, पत्ता और फूल। पौधे हमें ताज़ी हवा और फल देते हैं।"
+    "Plants grow all around us. Their main parts are roots, stems, leaves, and flowers. Plants give us fresh air and fruit."
   );
 
   const [isLoading, setIsLoading] = useState(false);
@@ -57,6 +59,9 @@ function CreateLessonForm() {
           setTitle(saved.title);
           setGrade(saved.grade);
           setSubject(saved.subject);
+          setSourceLang(saved.kit.sourceLanguage);
+          setTargetLang(saved.kit.targetLanguage);
+          setContent(saved.kit.lesson.hindi);
           setLearningKit(saved.kit);
         }
       }
@@ -84,6 +89,7 @@ function CreateLessonForm() {
           grade,
           subject,
           targetLanguage: targetLang,
+          sourceLanguage: sourceLang,
         }),
       });
 
@@ -185,26 +191,9 @@ function CreateLessonForm() {
   };
 
   return (
-    <PageContainer className="max-w-4xl mx-auto flex flex-col gap-8">
-      {/* Breadcrumb & Title */}
-      <div>
-        <div className="flex items-center gap-2 text-xs sm:text-sm text-slate-500 mb-2">
-          <Link href="/lessons" className="hover:text-amber-700">
-            Lesson Library
-          </Link>
-          <span>/</span>
-          <span className="font-semibold text-slate-800">
-            {currentLessonId ? "Edit Saved Lesson" : "Create New Lesson"}
-          </span>
-        </div>
-
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-          Create Mother-Tongue Lesson Kit
-        </h1>
-        <p className="text-sm text-slate-600 max-w-2xl mt-1 leading-relaxed font-medium">
-          Provide standard textbook material in Hindi to generate Santhali pedagogical adaptations powered by our AI pipeline.
-        </p>
-      </div>
+    <PageContainer className="lesson-editor flex flex-col gap-8">
+      <PageHeading eyebrow={currentLessonId ? "Your lesson, thoughtfully refined." : "From your ideas to their imagination."} title={<>Create a lesson. <span>Open a world.</span></>} description="Start in English, Hindi, or Hinglish. Turn it into a bilingual learning kit with stories, vocabulary, and activities your students can connect with."/>
+      <div className="editor-steps" aria-label="Lesson creation steps"><span className="current">01 <b>Add your content</b></span><span>02 <b>Generate learning kit</b></span><span>03 <b>Review & teach</b></span></div>
 
       {/* Language Selector Component */}
       <LanguageSelector
@@ -218,7 +207,7 @@ function CreateLessonForm() {
       {/* Lesson Creation Form */}
       <form
         onSubmit={handleSubmit}
-        className="bg-white rounded-3xl border border-slate-200 p-6 md:p-8 shadow-2xs space-y-6"
+        className="lesson-form bg-white rounded-3xl border border-slate-200 p-6 md:p-8 shadow-2xs space-y-6"
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Lesson Title */}
@@ -235,7 +224,7 @@ function CreateLessonForm() {
               required
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="e.g. Plants Around Us (हमारे आसपास के पौधे)"
+              placeholder="e.g. Plants Around Us"
               className="w-full px-4 py-3 rounded-xl border border-slate-300 text-slate-900 text-sm sm:text-base focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white"
             />
           </div>
@@ -276,6 +265,7 @@ function CreateLessonForm() {
               onChange={(e) => setSubject(e.target.value)}
               className="w-full px-4 py-3 rounded-xl border border-slate-300 text-slate-900 text-sm sm:text-base focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white"
             >
+              <option value="English">English</option>
               <option value="Hindi">Hindi</option>
               <option value="Mathematics">Mathematics</option>
               <option value="Environmental Studies">Environmental Studies</option>
@@ -286,7 +276,7 @@ function CreateLessonForm() {
 
         {/* Source Content Textarea */}
         <div className="space-y-2">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <label
               htmlFor="lesson-content"
               className="block text-sm font-bold uppercase tracking-wider text-slate-800"
@@ -303,10 +293,12 @@ function CreateLessonForm() {
             rows={6}
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            placeholder="Type or paste standard Hindi textbook content here..."
+            placeholder={`Type or dictate your ${sourceLang} lesson here…`}
             className="w-full px-4 py-3 rounded-xl border border-slate-300 text-slate-900 text-sm sm:text-base leading-relaxed focus:ring-2 focus:ring-amber-500 focus:border-amber-500 bg-white"
           />
         </div>
+
+        <SpeechInput key={sourceLang} language={sourceLang} onTranscript={text => setContent(previous => `${previous}${previous ? " " : ""}${text}`)}/>
 
         {/* Action Button & Loading Indicator */}
         {!isOnline && (
@@ -316,12 +308,12 @@ function CreateLessonForm() {
           </div>
         )}
 
-        <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="w-full sm:w-auto flex flex-col gap-2">
+        <div className="lesson-form-actions">
+          <div className="generate-action">
             <button
               type="submit"
               disabled={isLoading || !isOnline}
-              className={`w-full sm:w-auto px-8 py-3.5 rounded-xl font-semibold text-sm sm:text-base shadow-xs transition-all flex items-center justify-center gap-2.5 ${isLoading || !isOnline
+              className={`generate-button w-full sm:w-auto px-8 py-3.5 rounded-xl font-semibold text-sm sm:text-base shadow-xs transition-all flex items-center justify-center gap-2.5 ${isLoading || !isOnline
                   ? "bg-slate-300 text-slate-500 cursor-not-allowed"
                   : "bg-amber-600 text-white hover:bg-amber-700 active:scale-98"
                 }`}
@@ -348,15 +340,15 @@ function CreateLessonForm() {
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     />
                   </svg>
-                  <span>Translating Hindi to Santhali Ol Chiki via AI engine...</span>
+                  <span>Creating your learning kit…</span>
                 </>
               ) : (
                 <>
-                  <span>✨ Generate Learning Kit</span>
+                  <span>Create Learning Kit</span>
                 </>
               )}
             </button>
-            <span className="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider text-center sm:text-left pl-1">⚡ Powered by Automated AI Pipeline</span>
+            <span className="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider text-center sm:text-left pl-1">Review generated content before teaching</span>
           </div>
 
           <Link
@@ -502,7 +494,7 @@ function CreateLessonForm() {
                 <span className="text-base">👩‍🏫</span>
                 <span className="font-semibold">
                   {isEditing
-                    ? "Editing Mode Active: Modify Santhali translations, vocabulary, or quiz questions below."
+                    ? "Editing Mode Active: Modify translations, vocabulary, or quiz questions below."
                     : learningKit.verificationStatus === "verified"
                       ? "This lesson kit has been reviewed and verified by a teacher for classroom presentation."
                       : "Review AI translations below, make any corrections, and click 'Approve & Verify'."}
@@ -578,7 +570,7 @@ function CreateLessonForm() {
                   <span className="font-bold text-emerald-950 text-sm">Confirm Teacher Verification</span>
                 </div>
                 <p className="text-xs sm:text-sm text-emerald-900">
-                  By approving, you confirm that you have reviewed the Santhali translations (Ol Chiki script),
+                  By approving, you confirm that you have reviewed the generated translations,
                   vocabulary terms, quiz questions and answers, and worksheet content in this lesson kit.
                   This will mark the lesson as teacher-verified for student use.
                 </p>
@@ -630,7 +622,7 @@ function CreateLessonForm() {
               {/* Hindi Source */}
               <div className="p-5 rounded-2xl bg-amber-50/70 border border-amber-200 space-y-2">
                 <span className="text-xs font-bold uppercase tracking-wider text-amber-900">
-                  Hindi (Source Curriculum)
+                  {learningKit.sourceLanguage} (Source Curriculum)
                 </span>
                 {isEditing ? (
                   <textarea
@@ -658,7 +650,7 @@ function CreateLessonForm() {
               {/* Santhali Adaptation */}
               <div className="p-5 rounded-2xl bg-emerald-50/70 border border-emerald-200 space-y-2">
                 <span className="text-xs font-bold uppercase tracking-wider text-emerald-900">
-                  Santhali Vernacular Adaptation (Ol Chiki Script)
+                  {learningKit.targetLanguage} Adaptation
                 </span>
                 {isEditing ? (
                   <textarea
@@ -754,7 +746,7 @@ function CreateLessonForm() {
                   {isEditing ? (
                     <div className="space-y-2">
                       <div>
-                        <label className="text-[10px] font-bold text-slate-500 uppercase">Hindi Term</label>
+                        <label className="text-[10px] font-bold text-slate-500 uppercase">{learningKit.sourceLanguage} Term</label>
                         <input
                           type="text"
                           value={v.hindi}
@@ -771,7 +763,7 @@ function CreateLessonForm() {
                         />
                       </div>
                       <div>
-                        <label className="text-[10px] font-bold text-slate-500 uppercase">Santhali (Ol Chiki)</label>
+                        <label className="text-[10px] font-bold text-slate-500 uppercase">{learningKit.targetLanguage}</label>
                         <input
                           type="text"
                           value={v.santhali}
@@ -1203,7 +1195,7 @@ function CreateLessonForm() {
                   <span>📝 Bilingual Worksheet</span>
                 </h3>
                 <span className="text-xs font-semibold text-violet-800 bg-violet-50 px-3 py-1 rounded-full border border-violet-200">
-                  Hindi + Santhali
+                  {learningKit.sourceLanguage} + {learningKit.targetLanguage}
                 </span>
               </div>
 
@@ -1212,11 +1204,11 @@ function CreateLessonForm() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="p-4 rounded-2xl bg-amber-50/70 border border-amber-200 space-y-1.5">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-amber-900">Instructions (Hindi)</span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-amber-900">Instructions ({learningKit.sourceLanguage})</span>
                     <p className="text-sm text-slate-900">{learningKit.worksheet.instructionsHindi}</p>
                   </div>
                   <div className="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 space-y-1.5">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-900">Instructions (Santhali / Ol Chiki)</span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-900">Instructions ({learningKit.targetLanguage})</span>
                     <p className="text-sm font-santhali font-bold text-emerald-950">{learningKit.worksheet.instructionsSanthali}</p>
                   </div>
                 </div>
@@ -1239,11 +1231,11 @@ function CreateLessonForm() {
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         <div className="space-y-0.5">
-                          <span className="text-[10px] font-bold text-amber-800 uppercase">Hindi</span>
+                          <span className="text-[10px] font-bold text-amber-800 uppercase">{learningKit.sourceLanguage}</span>
                           <p className="text-sm text-slate-900">{item.promptHindi}</p>
                         </div>
                         <div className="space-y-0.5">
-                          <span className="text-[10px] font-bold text-emerald-800 uppercase">Santhali</span>
+                          <span className="text-[10px] font-bold text-emerald-800 uppercase">{learningKit.targetLanguage}</span>
                           <p className="text-sm font-santhali font-bold text-emerald-950">{item.promptSanthali}</p>
                         </div>
                       </div>
@@ -1265,13 +1257,13 @@ function CreateLessonForm() {
       {/* System Explanation Section */}
       <div className="bg-white rounded-3xl border border-slate-200 p-6 md:p-8 space-y-4 shadow-2xs">
         <h3 className="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
-          <span>🧠 How the VaaniShiksha AI Engine operates</span>
+          <span>What goes into your learning kit</span>
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs sm:text-sm text-slate-700">
           <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 space-y-1.5">
             <div className="font-bold text-slate-900">1. Vernacular Translation</div>
             <p className="text-slate-600 text-xs sm:text-sm">
-              Translates source text into Santhali (Ol Chiki script), maintaining dialectal fidelity.
+              Adapts source text into your selected learning language, for you to review and adapt.
             </p>
           </div>
           <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 space-y-1.5">
@@ -1283,7 +1275,7 @@ function CreateLessonForm() {
           <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 space-y-1.5">
             <div className="font-bold text-slate-900">3. Teacher Verification</div>
             <p className="text-slate-600 text-xs sm:text-sm">
-              Presents generated materials to the teacher for one-click verification or manual correction.
+              Presents generated materials to the teacher for careful review and correction.
             </p>
           </div>
         </div>

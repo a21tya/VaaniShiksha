@@ -1,5 +1,6 @@
 import Link from "next/link";
 import PageContainer from "@/components/PageContainer";
+import PageHeading from "@/components/PageHeading";
 import StatCard from "@/components/StatCard";
 import LessonCard from "@/components/LessonCard";
 import LanguageSelector from "@/components/LanguageSelector";
@@ -43,37 +44,10 @@ const DEMO_LESSONS = [
 export default function TeacherDashboard() {
   return (
     <PageContainer className="flex flex-col gap-8">
-      {/* Top Header & Greeting Banner */}
-      <div className="bg-white rounded-3xl border border-slate-200 p-6 md:p-8 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100/70 border border-amber-200 text-amber-950 text-xs sm:text-sm font-semibold mb-2">
-            <span>👩‍🏫 Educator Hub • Primary Education</span>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-            Welcome, Teacher
-          </h1>
-          <p className="text-sm sm:text-base text-slate-600 mt-1">
-            Manage your mother-tongue lesson kits, review translations, and adapt primary learning materials for your classroom.
-          </p>
-        </div>
-
-        {/* Primary Action Buttons */}
-        <div className="flex items-center gap-3">
-          <Link
-            href="/lessons"
-            className="px-5 py-3.5 rounded-xl bg-white border border-slate-300 text-slate-800 font-semibold text-sm sm:text-base hover:bg-slate-50 transition-all flex items-center justify-center gap-2 shrink-0 shadow-2xs"
-          >
-            <span>📚 Lesson Library</span>
-          </Link>
-          <Link
-            href="/create-lesson"
-            className="px-6 py-3.5 rounded-xl bg-amber-600 text-white font-semibold text-sm sm:text-base shadow-xs hover:bg-amber-700 transition-all flex items-center justify-center gap-2 group shrink-0"
-          >
-            <span className="text-lg leading-none">+</span>
-            <span>Create New Lesson</span>
-          </Link>
-        </div>
-      </div>
+      <PageHeading eyebrow="A little preparation. A world of possibility." title={<>Your classroom, <span>in their language.</span></>} description="Create thoughtful lessons, review translations, and help every child feel at home in learning.">
+        <Link href="/create-lesson" className="primary-action">Create Lesson <span>→</span></Link>
+        <Link href="/lessons" className="secondary-action">Open Lesson Library</Link>
+      </PageHeading>
 
       {/* Language Area Indicator */}
       <LanguageSelector sourceLang="Hindi" targetLang="Santhali" />

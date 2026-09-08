@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getAudioBlob, saveAudioBlob } from "@/lib/storage";
 
 type SantaliAudioButtonProps = {
@@ -18,6 +18,10 @@ export default function SantaliAudioButton({
   const [error, setError] = useState("");
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const currentUrl = useRef<string | null>(null);
+
+  useEffect(() => () => {
+    if (currentUrl.current) URL.revokeObjectURL(currentUrl.current);
+  }, []);
 
   const showAudioPlayer = (blob: Blob) => {
     if (currentUrl.current) URL.revokeObjectURL(currentUrl.current);
@@ -68,7 +72,7 @@ export default function SantaliAudioButton({
         {status === "loading" ? "Generating audio…" : "🔊 Listen in Santhali"}
       </button>
       <div className="mt-2 text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider pl-1">
-        ⚡ Santhali Audio (Local Cache &amp; Offline Engine)
+        Saved audio plays offline · New audio uses your local voice service
       </div>
       {error && <p role="alert" className="mt-2 text-xs font-semibold text-red-700">{error}</p>}
       {audioUrl && (

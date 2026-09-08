@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import PageContainer from "@/components/PageContainer";
+import PageHeading from "@/components/PageHeading";
 import { SavedLesson } from "@/types/lesson";
 import { getSavedLessons, deleteSavedLesson } from "@/lib/storage";
 
@@ -47,39 +48,16 @@ export default function LessonLibraryPage() {
 
   return (
     <PageContainer className="flex flex-col gap-8">
-      {/* Header Banner */}
-      <div className="bg-white rounded-3xl border border-slate-200 p-6 md:p-8 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100/80 border border-amber-200 text-amber-950 text-xs sm:text-sm font-semibold mb-2">
-            <span>📚 Educator Repository • Local Storage</span>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-            Teacher Lesson Library
-          </h1>
-          <p className="text-sm sm:text-base text-slate-600 mt-1">
-            Manage, verify, edit, and deploy saved Santhali curriculum units directly to Student Mode.
-          </p>
-        </div>
-
-        <div>
-          <Link
-            href="/create-lesson"
-            className="px-6 py-3 rounded-xl bg-amber-600 text-white font-semibold text-sm sm:text-base shadow-xs hover:bg-amber-700 transition-all flex items-center justify-center gap-2 shrink-0"
-          >
-            <span className="text-lg leading-none">+</span>
-            <span>Create New Lesson</span>
-          </Link>
-        </div>
-      </div>
+      <PageHeading eyebrow="Good lessons deserve to be shared." title={<>Your lesson <span>library.</span></>} description="A home for your bilingual stories, activities, and learning kits. Review, refine, and bring them into your classroom."><Link href="/create-lesson" className="primary-action">Create Lesson <span>→</span></Link></PageHeading>
 
       {/* Lessons List Section */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-lg sm:text-xl font-bold text-slate-900">
-            Saved Curriculum Units ({lessons.length})
+            Your saved lessons ({lessons.length})
           </h2>
           <span className="text-xs font-semibold text-slate-500">
-            Persisted in local browser storage
+            Saved on this device
           </span>
         </div>
 

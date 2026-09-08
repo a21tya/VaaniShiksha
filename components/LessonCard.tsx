@@ -30,7 +30,7 @@ export default function LessonCard({
   return (
     <div className="bg-white rounded-2xl border border-slate-200 p-5 shadow-2xs hover:shadow-md transition-shadow flex flex-col justify-between">
       <div>
-        <div className="flex items-center justify-between gap-2 mb-3">
+        <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
           <span className="px-2.5 py-1 text-xs font-medium bg-slate-100 text-slate-700 rounded-md">
             {grade} • {subject}
           </span>
@@ -55,7 +55,7 @@ export default function LessonCard({
         <p className="mt-3 text-xs text-slate-500 flex items-center gap-2">
           <span>📚 {activityCount} Learning Activities</span>
           <span>•</span>
-          <span className="text-amber-700 font-medium">[Demo Data]</span>
+          <span className="text-amber-700 font-medium">Sample lesson</span>
         </p>
       </div>
 

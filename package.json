@@ -6,7 +6,10 @@
     "dev": "next dev --webpack",
     "build": "next build --webpack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "tts:setup": "bash tts_service/setup.sh",
+    "tts:start": "bash tts_service/start.sh",
+    "dev:local": "node scripts/dev-local.mjs"
   },
   "dependencies": {
     "@google/genai": "^2.20.0",

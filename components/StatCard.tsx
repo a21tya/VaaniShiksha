@@ -45,7 +45,7 @@ export default function StatCard({
         <span className="text-3xl font-extrabold tracking-tight text-slate-900">
           {value}
         </span>
-        <span className="text-xs font-medium text-slate-400">demo count</span>
+        <span className="text-xs font-medium text-slate-400">sample lessons</span>
       </div>
       {description && (
         <p className="mt-1 text-xs text-slate-500 font-normal">

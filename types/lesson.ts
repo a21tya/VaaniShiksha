@@ -1,7 +1,7 @@
 export interface LearningKit {
   title: string;
-  sourceLanguage: "Hindi";
-  targetLanguage: "Santhali";
+  sourceLanguage: "Hindi" | "English" | "Hinglish";
+  targetLanguage: "Santhali" | "English" | "Hindi" | "Hinglish";
   grade: string;
   subject: string;
   lesson: {
@@ -68,8 +68,8 @@ export interface SavedLesson {
   title: string;
   grade: string;
   subject: string;
-  sourceLanguage: "Hindi";
-  targetLanguage: "Santhali";
+  sourceLanguage: "Hindi" | "English" | "Hinglish";
+  targetLanguage: "Santhali" | "English" | "Hindi" | "Hinglish";
   createdAt: string;
   updatedAt: string;
   kit: LearningKit;
@@ -83,7 +83,7 @@ export interface GenerateLessonRequest {
   lessonText: string;
   grade: string;
   subject: string;
-  targetLanguage: "Santhali";
+  targetLanguage: "Santhali" | "English" | "Hindi" | "Hinglish";
 }
 
 export type GenerateLessonResponse =

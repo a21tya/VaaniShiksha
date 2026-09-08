@@ -87,9 +87,9 @@ export default function StudentModeContent({ lessonId: serverLessonId }: { lesso
   const steps = hasWorksheet ? [...BASE_STEPS, WORKSHEET_STEP] : BASE_STEPS;
 
   return (
-    <PageContainer className="max-w-4xl mx-auto flex flex-col gap-8">
+    <PageContainer className="student-lesson flex flex-col gap-8">
       {/* Primary Student Header Banner */}
-      <div className="bg-gradient-to-r from-emerald-600 to-teal-700 rounded-3xl p-6 sm:p-8 text-white shadow-md flex flex-col sm:flex-row items-center justify-between gap-6">
+      <div className="student-lesson-heading">
         <div className="space-y-2 text-center sm:text-left">
           <div className="flex items-center justify-center sm:justify-start gap-2 flex-wrap">
             <span className="inline-block px-3.5 py-1 bg-white/20 rounded-full text-xs sm:text-sm font-semibold uppercase tracking-wider backdrop-blur-xs">
@@ -139,7 +139,7 @@ export default function StudentModeContent({ lessonId: serverLessonId }: { lesso
 
       {/* Child-Friendly Progression Navigation Bar */}
       <div className="bg-white rounded-2xl border border-slate-200 p-2 sm:p-3 shadow-2xs">
-        <div className={`grid gap-1 text-center ${hasWorksheet ? 'grid-cols-6' : 'grid-cols-5'}`}>
+        <div className={`learning-tabs grid gap-1 text-center ${hasWorksheet ? 'grid-cols-6' : 'grid-cols-5'}`}>
           {steps.map((step) => {
             const isActive = currentStep === step.id;
             const isCompleted = currentStep > step.id;
@@ -157,7 +157,7 @@ export default function StudentModeContent({ lessonId: serverLessonId }: { lesso
                   }`}
               >
                 <span className="text-base sm:text-lg">{step.icon}</span>
-                <span className="hidden xs:inline sm:inline">{step.name}</span>
+                <span className="step-label">{step.name}</span>
               </button>
             );
           })}
@@ -180,7 +180,7 @@ export default function StudentModeContent({ lessonId: serverLessonId }: { lesso
             {/* Hindi Source Box */}
             <div className="p-5 rounded-2xl bg-amber-50 border border-amber-200 space-y-1.5">
               <span className="text-xs font-bold uppercase tracking-wider text-amber-900">
-                Hindi (Curriculum Text)
+                {kit.sourceLanguage} (Curriculum Text)
               </span>
               <p className="font-medium text-slate-900 text-lg sm:text-xl leading-relaxed">
                 {kit.lesson.hindi}
@@ -190,16 +190,16 @@ export default function StudentModeContent({ lessonId: serverLessonId }: { lesso
             {/* Santhali Adaptation Box */}
             <div className="p-5 rounded-2xl bg-emerald-50 border border-emerald-200 space-y-1.5">
               <span className="text-xs font-bold uppercase tracking-wider text-emerald-900">
-                Santhali Vernacular Adaptation (Ol Chiki Script)
+                {kit.targetLanguage} Adaptation
               </span>
               <p className="font-santhali font-bold text-emerald-950 text-xl sm:text-2xl leading-relaxed">
                 {kit.lesson.santhali}
               </p>
-              <SanthaliAudioButton
+              {kit.targetLanguage === "Santhali" && <SanthaliAudioButton
                 text={kit.lesson.santhali}
                 lessonId={savedLesson?.id || "demo-lesson"}
                 audioId={`lesson-story-${savedLesson?.id || "demo-lesson"}`}
-              />
+              />}
               {kit.lesson.romanization && (
                 <p className="text-xs sm:text-sm text-emerald-800 pt-1">
                   <strong>Pronunciation:</strong> {kit.lesson.romanization}
@@ -238,7 +238,7 @@ export default function StudentModeContent({ lessonId: serverLessonId }: { lesso
                 Vocabulary Words
               </h2>
               <p className="text-xs sm:text-sm text-slate-600">
-                Learn key terms in Hindi and Santhali (Ol Chiki)
+                Learn key terms in {kit.sourceLanguage} and {kit.targetLanguage}
               </p>
             </div>
             <span className="text-xs font-bold text-emerald-900 bg-emerald-100 px-3 py-1.5 rounded-full border border-emerald-300">
@@ -294,7 +294,7 @@ export default function StudentModeContent({ lessonId: serverLessonId }: { lesso
                 Interactive Flashcards
               </h2>
               <p className="text-xs sm:text-sm text-slate-600">
-                Tap card to flip between question and Santhali translation
+                Tap card to flip between question and translation
               </p>
             </div>
 
@@ -310,7 +310,7 @@ export default function StudentModeContent({ lessonId: serverLessonId }: { lesso
                 className="cursor-pointer w-full min-h-[180px] p-8 rounded-3xl bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-300 flex flex-col items-center justify-center text-center space-y-3 transition-transform hover:scale-[1.01]"
               >
                 <span className="text-xs font-bold uppercase tracking-widest text-amber-900">
-                  {isCardFlipped ? "Back (Answer / Santhali)" : "Front (Click to Flip)"}
+                  {isCardFlipped ? "Back (Answer)" : "Front (Click to Flip)"}
                 </span>
                 <p className="text-2xl sm:text-3xl font-extrabold text-slate-900 font-santhali">
                   {isCardFlipped ? currentCard.back : currentCard.front}
@@ -382,7 +382,7 @@ export default function StudentModeContent({ lessonId: serverLessonId }: { lesso
                 Comprehension Quiz
               </h2>
               <p className="text-xs sm:text-sm text-slate-600">
-                Answer questions to check understanding of Santhali terms
+                Answer questions to check understanding of key terms
               </p>
             </div>
             <span className="text-xs font-bold text-emerald-900 bg-emerald-100 px-3 py-1.5 rounded-full border border-emerald-300">
@@ -501,7 +501,7 @@ export default function StudentModeContent({ lessonId: serverLessonId }: { lesso
                 <div className="space-y-1">
                   <h3 className="text-2xl font-extrabold text-slate-900">Lesson Completed!</h3>
                   <p className="text-sm text-slate-600 max-w-md mx-auto">
-                    Great job studying <strong>{kit.title}</strong> in Santhali!
+                    Great job studying <strong>{kit.title}</strong> in {kit.targetLanguage}!
                   </p>
                 </div>
                 <div className="pt-3 flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -545,7 +545,7 @@ export default function StudentModeContent({ lessonId: serverLessonId }: { lesso
                 <span>📋 Worksheet Practice</span>
               </h2>
               <span className="text-xs font-semibold text-violet-800 bg-violet-50 px-3 py-1 rounded-full border border-violet-200">
-                Hindi + Santhali
+                {kit.sourceLanguage} + {kit.targetLanguage}
               </span>
             </div>
 
@@ -553,11 +553,11 @@ export default function StudentModeContent({ lessonId: serverLessonId }: { lesso
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="p-4 rounded-2xl bg-amber-50/70 border border-amber-200 space-y-1.5">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-900">निर्देश (Hindi)</span>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-900">Instructions ({kit.sourceLanguage})</span>
                 <p className="text-sm text-slate-900">{kit.worksheet.instructionsHindi}</p>
               </div>
               <div className="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 space-y-1.5">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-900">ᱛᱟᱞᱢᱟ (Santhali)</span>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-900">Instructions ({kit.targetLanguage})</span>
                 <p className="text-sm font-santhali font-bold text-emerald-950">{kit.worksheet.instructionsSanthali}</p>
               </div>
             </div>
@@ -575,11 +575,11 @@ export default function StudentModeContent({ lessonId: serverLessonId }: { lesso
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
-                      <span className="text-[10px] font-bold text-amber-800 uppercase">Hindi</span>
+                      <span className="text-[10px] font-bold text-amber-800 uppercase">{kit.sourceLanguage}</span>
                       <p className="text-sm text-slate-900 mt-0.5">{item.promptHindi}</p>
                     </div>
                     <div>
-                      <span className="text-[10px] font-bold text-emerald-800 uppercase">Santhali</span>
+                      <span className="text-[10px] font-bold text-emerald-800 uppercase">{kit.targetLanguage}</span>
                       <p className="text-sm font-santhali font-bold text-emerald-950 mt-0.5">{item.promptSanthali}</p>
                     </div>
                   </div>
@@ -594,7 +594,7 @@ export default function StudentModeContent({ lessonId: serverLessonId }: { lesso
             <div className="space-y-1">
               <h3 className="text-2xl font-extrabold text-slate-900">Lesson Completed!</h3>
               <p className="text-sm text-slate-600 max-w-md mx-auto">
-                Great job studying <strong>{kit.title}</strong> in Santhali!
+                Great job studying <strong>{kit.title}</strong> in {kit.targetLanguage}!
               </p>
             </div>
             <div className="pt-3 flex flex-col sm:flex-row items-center justify-center gap-3">
