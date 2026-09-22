@@ -52,3 +52,9 @@ tts_service/.venv/
 tts_service/venv/
 tts_service/models/
 __pycache__/
+
+# Downloaded official textbook files
+.ncert-cache/
+
+/test-results/
+/playwright-report/

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import OfflineNavigation from "@/components/OfflineNavigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
@@ -32,6 +33,7 @@ export default function RootLayout({
       className="h-full antialiased"
     >
       <body className="min-h-full flex flex-col bg-[#fcfbf9] text-slate-800">
+        <OfflineNavigation />
         <Navbar />
         {children}
         <Footer />

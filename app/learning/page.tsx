@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import Link from "@/components/OfflineLink";
 import PageContainer from "@/components/PageContainer";
 import PageHeading from "@/components/PageHeading";
 import LearningNavigation from "@/components/LearningNavigation";
@@ -35,7 +35,7 @@ export default function LearningHub() {
         </article>; })}</div>
         {books.length === 0 && <div className="learning-empty"><Icon name="book" size={34}/><h3>{savedOnly ? "Your bookshelf is waiting." : "No books found here."}</h3><p>{savedOnly ? "Save a book using its bookmark button, or try another class." : "Try a different title or subject for this class."}</p><button type="button" className="secondary-action" onClick={() => { setQuery(""); setSubject("All subjects"); setSavedOnly(false); }}>Show all Class {grade} books</button></div>}
         {grade < 3 && <p className="class-note"><Icon name="spark" size={18}/>For Classes 1–2, learning about nature, art, and movement is woven into foundational learning. Separate subject books appear here from Class 3.</p>}
-        <div className="ncert-note"><Icon name="globe" size={21}/><div><b>A doorway to the official books</b><p>Books open on NCERT in a new tab, where you can read chapters or download available PDFs. Internet is needed to open them. Bookmarks save links on this device, not the PDFs.</p><a href="https://ncert.nic.in/textbook.php" target="_blank" rel="noopener noreferrer">Browse NCERT for other language editions ↗</a></div></div>
+        <div className="ncert-note"><Icon name="globe" size={21}/><div><b>A doorway to the official books</b><p>Open a book to read chapter PDFs here or download the complete book for offline reading. Bookmarks and downloaded books are separate. Use Offline setup to download all books.</p><a href="https://ncert.nic.in/textbook.php" target="_blank" rel="noopener noreferrer">Browse NCERT for other language editions ↗</a></div></div>
       </section>
       <aside className="learning-sidebar" aria-label="More ways to learn"><div className="dictionary-invitation"><span className="learning-kicker">SMALL WORDS, BIG WORLDS</span><div className="dictionary-letter" aria-hidden="true">अ<span>A</span></div><h2>Meet your<br/>little dictionary.</h2><p>Simple meanings. Familiar examples. A bridge between Hindi and English.</p><Link href="/learning/dictionary">Discover new words <Icon name="arrow" size={17}/></Link></div><div className="word-preview"><span className="learning-kicker">A WORD TO TAKE WITH YOU</span><h3>Curiosity</h3><span lang="hi">जिज्ञासा</span><p>The wish to learn or know more about something.</p><blockquote>“Every question is the beginning of a discovery.”</blockquote></div><div className="reading-ritual"><Icon name="book" size={24}/><h3>Make a little time for reading.</h3><ol><li>Pick a book that interests you.</li><li>Read a little, slowly.</li><li>Share one new thing you learned.</li></ol></div><Link href="/student/catalog" className="learning-lessons-link"><Icon name="students"/><span>Learn in Santhali<small>Open your classroom lessons</small></span><Icon name="arrow" size={17}/></Link></aside>
     </div>

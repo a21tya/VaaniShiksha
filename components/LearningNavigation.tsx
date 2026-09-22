@@ -1,5 +1,5 @@
 "use client";
-import Link from "next/link";
+import Link from "@/components/OfflineLink";
 import { usePathname } from "next/navigation";
 import Icon from "./Icon";
 

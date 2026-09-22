@@ -9,10 +9,13 @@
     "lint": "eslint",
     "tts:setup": "bash tts_service/setup.sh",
     "tts:start": "bash tts_service/start.sh",
-    "dev:local": "node scripts/dev-local.mjs"
+    "dev:local": "node scripts/dev-local.mjs",
+    "test:offline": "playwright test",
+    "verify:ncert": "node scripts/verify-ncert.mjs"
   },
   "dependencies": {
     "@google/genai": "^2.20.0",
+    "@mlc-ai/web-llm": "^0.2.85",
     "@serwist/next": "^9.5.12",
     "idb-keyval": "^6.3.0",
     "next": "16.3.4",
@@ -21,6 +24,7 @@
     "serwist": "^9.5.12"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",

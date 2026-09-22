@@ -1,7 +1,8 @@
 import type { IconName } from "@/components/Icon";
 
 export type Subject = "Hindi" | "English" | "Mathematics" | "The World Around Us" | "Arts" | "Physical Education" | "Urdu";
-export type SchoolClass = 1 | 2 | 3 | 4 | 5;
+export const SCHOOL_CLASSES = [1, 2, 3, 4, 5] as const;
+export type SchoolClass = typeof SCHOOL_CLASSES[number];
 export const SUBJECTS: Record<Subject, { icon: IconName; color: string; symbol: string; description: string }> = {
   Hindi: { icon: "translate", color: "saffron", symbol: "अ आ", description: "Poems, stories, and the joy of expressing yourself." },
   English: { icon: "book", color: "blue", symbol: "Aa", description: "Discover new words through stories and conversation." },
@@ -11,9 +12,9 @@ export const SUBJECTS: Record<Subject, { icon: IconName; color: string; symbol: 
   "Physical Education": { icon: "students", color: "purple", symbol: "↟", description: "Learn through movement, traditional games, and yoga." },
   Urdu: { icon: "translate", color: "teal", symbol: "ا ب", description: "Explore the beauty of language through reading and writing." },
 };
-export interface SchoolBook { id: string; grade: SchoolClass; title: string; subject: Subject; language: string; url: string }
+export interface SchoolBook { id: string; grade: SchoolClass; title: string; subject: Subject; language: string; url: string; chapters: number; flipbookUrl: string }
 const book = (grade: SchoolClass, title: string, subject: Subject, language: string, query: string): SchoolBook => ({
-  id: query.split("=")[0], grade, title, subject, language, url: `https://ncert.nic.in/textbook.php?${query}`,
+  id: query.split("=")[0], grade, title, subject, language, chapters: Number(query.split("-")[1]), flipbookUrl: `https://epathshala.nic.in/wp-content/doc/book/flipbook/${query.split("=")[0]}01.html`, url: `https://ncert.nic.in/textbook.php?${query}`,
 });
 
 // Official NCERT destinations. See docs/learning-resources.md for catalog sources.
@@ -41,7 +42,7 @@ export const SCHOOL_BOOKS: SchoolBook[] = [
   book(4, "Maths Mela", "Mathematics", "English", "demm1=0-14"),
   book(4, "Our Wondrous World", "The World Around Us", "English", "deev1=0-10"),
   book(4, "Bansuri", "Arts", "English", "debu1=0-18"),
-  book(4, "Khel Yoga", "Physical Education", "English", "deky1=0-4"),
+  book(4, "Khel Yoga", "Physical Education", "English", "deky1=0-3"),
   book(4, "Sitar", "Urdu", "Urdu", "dust1=0-14"),
   book(5, "Veena", "Hindi", "Hindi", "ehve1=0-12"),
   book(5, "Santoor", "English", "English", "eesa1=0-10"),
@@ -49,7 +50,7 @@ export const SCHOOL_BOOKS: SchoolBook[] = [
   book(5, "Our Wondrous World", "The World Around Us", "English", "eeev1=0-10"),
   book(5, "Bansuri", "Arts", "English", "eebu1=0-19"),
   book(5, "Khel Yoga", "Physical Education", "English", "eeky1=0-3"),
-  book(5, "Sitar", "Urdu", "Urdu", "eust1=0-14"),
+  book(5, "Sitar", "Urdu", "Urdu", "eust1=0-18"),
 ];
 
 export type WordTopic = "Nature" | "Numbers & shapes" | "School" | "Everyday life";

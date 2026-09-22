@@ -18,3 +18,11 @@ Catalog sources reviewed on 8 September 2026:
 NCERT's live portal timed out/reset connections in this environment during implementation. Indexed official listings and published link lists were used; this is not a claim that every external endpoint was live-tested. Keep explicit book IDs in `lib/learning-resources.ts` and check against NCERT when revising editions. Classes 1–2 do not get fabricated standalone EVS, arts, or PE textbook entries.
 
 The dictionary is an original, locally bundled Hindi–English starter collection with 36 common words, simple definitions, transliterations, and examples. It is not an NCERT dictionary or a full translation service. Unverified Santhali entries have not been relabeled as verified dictionary entries. Add reviewed words through the typed data collection as it grows.
+
+## Offline textbook reader (September 2026)
+
+The reader now loads official `https://ncert.nic.in/textbook/pdf/{bookId}{part}.pdf` files through a same-origin, allowlisted endpoint. It validates the PDF signature, limits response size and caches downloaded copies on the host when its filesystem is writable. The browser explicitly stores PDFs in Cache Storage for use after disconnection. PDF import provides an option during NCERT outages; imported content is supplied by the user, not independently verified.
+
+`npm run verify:ncert` checks every catalog prelim/chapter URL. Results are recorded in `docs/ncert-verification.json`. NCERT's live textbook selector corrected Class 4 Khel Yoga to 3 chapters and Class 5 Sitar to 18 chapters. The previous Class 4 chapter 4 returned 404; Class 5 previously omitted four chapters.
+
+Bookmarks remain distinct from downloads. The offline setup screen counts actual stored PDFs, supports downloading the entire catalog, resumes completed parts, and offers removal. NCERT availability is outside this application's control; failed responses are never marked downloaded.

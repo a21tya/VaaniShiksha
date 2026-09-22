@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, Suspense } from "react";
-import Link from "next/link";
+import Link from "@/components/OfflineLink";
 import { useSearchParams } from "next/navigation";
 import PageContainer from "@/components/PageContainer";
 import PageHeading from "@/components/PageHeading";
@@ -28,6 +28,7 @@ function CreateLessonForm() {
     "Plants grow all around us. Their main parts are roots, stems, leaves, and flowers. Plants give us fresh air and fruit."
   );
 
+  const [generationMode, setGenerationMode] = useState<"device" | "cloud">("device");
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [saveSuccessMessage, setSaveSuccessMessage] = useState<string | null>(null);
@@ -78,6 +79,12 @@ function CreateLessonForm() {
     setIsEditing(false);
 
     try {
+      if (generationMode === "device") {
+        const { generateOfflineLesson } = await import("@/lib/offline-ai");
+        const kit = await generateOfflineLesson({ title, lessonText: content, grade, subject, targetLanguage: targetLang, sourceLanguage: sourceLang });
+        setLearningKit(kit); setEditableKit(null); setActiveCardIndex(0); setIsCardFlipped(false); setSelectedQuizAnswers({});
+        return;
+      }
       const response = await fetch("/api/generate-lesson", {
         method: "POST",
         headers: {
@@ -115,8 +122,8 @@ function CreateLessonForm() {
         document.getElementById("generated-kit-section")?.scrollIntoView({ behavior: "smooth" });
       }, 100);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Failed to communicate with server.";
-      setErrorMessage(`Network or server error: ${msg}`);
+      const msg = err instanceof Error ? err.message : typeof err === "string" ? err : err && typeof err === "object" ? JSON.stringify(err) : "Lesson generation failed. Please try again.";
+      setErrorMessage(generationMode === "device" ? msg : `Network or server error: ${msg}`);
     } finally {
       setIsLoading(false);
     }
@@ -301,10 +308,11 @@ function CreateLessonForm() {
         <SpeechInput key={sourceLang} language={sourceLang} onTranscript={text => setContent(previous => `${previous}${previous ? " " : ""}${text}`)}/>
 
         {/* Action Button & Loading Indicator */}
-        {!isOnline && (
+        <div className="offline-panel"><label htmlFor="generation-mode">Lesson generation </label><select id="generation-mode" value={generationMode} onChange={event => setGenerationMode(event.target.value as "device" | "cloud")}><option value="device">On this device · offline after model download</option><option value="cloud">Online Gemini</option></select><p>The small device model is experimental and needs teacher review. <Link href="/offline">Download model and check device support →</Link></p></div>
+        {!isOnline && generationMode === "cloud" && (
           <div className="p-4 rounded-2xl bg-slate-100 border border-slate-300 text-slate-800 text-sm font-medium">
             <span className="text-lg mr-2">🔌</span>
-            You are currently offline. AI generation requires an internet connection.
+            Online Gemini needs internet. Choose on-device generation if you have downloaded its model.
           </div>
         )}
 
@@ -312,8 +320,8 @@ function CreateLessonForm() {
           <div className="generate-action">
             <button
               type="submit"
-              disabled={isLoading || !isOnline}
-              className={`generate-button w-full sm:w-auto px-8 py-3.5 rounded-xl font-semibold text-sm sm:text-base shadow-xs transition-all flex items-center justify-center gap-2.5 ${isLoading || !isOnline
+              disabled={isLoading || (generationMode === "cloud" && !isOnline)}
+              className={`generate-button w-full sm:w-auto px-8 py-3.5 rounded-xl font-semibold text-sm sm:text-base shadow-xs transition-all flex items-center justify-center gap-2.5 ${isLoading || (generationMode === "cloud" && !isOnline)
                   ? "bg-slate-300 text-slate-500 cursor-not-allowed"
                   : "bg-amber-600 text-white hover:bg-amber-700 active:scale-98"
                 }`}
@@ -361,7 +369,7 @@ function CreateLessonForm() {
 
         {/* Error Notification Banner */}
         {errorMessage && (
-          <div className="p-5 rounded-2xl bg-red-50 border border-red-200 text-red-950 text-sm space-y-2">
+          <div role="alert" className="p-5 rounded-2xl bg-red-50 border border-red-200 text-red-950 text-sm space-y-2">
             <div className="flex items-center gap-2 font-bold text-red-800">
               <span className="text-lg">⚠️</span>
               <span>Generation Error</span>

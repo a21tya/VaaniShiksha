@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import Link from "@/components/OfflineLink";
 import { useSearchParams } from "next/navigation";
 import PageContainer from "@/components/PageContainer";
 import SanthaliAudioButton from "@/components/SanthaliAudioButton";

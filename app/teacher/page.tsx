@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/OfflineLink";
 import PageContainer from "@/components/PageContainer";
 import PageHeading from "@/components/PageHeading";
 import StatCard from "@/components/StatCard";

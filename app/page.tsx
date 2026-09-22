@@ -1,7 +1,9 @@
-import Link from "next/link";
+import Link from "@/components/OfflineLink";
 import Image from "next/image";
 import Icon, { type IconName } from "@/components/Icon";
 import { IndiaMap, Tricolor } from "@/components/Heritage";
+
+import { SCHOOL_CLASSES } from "@/lib/learning-resources";
 
 const steps = [
   { icon: "edit", title: "Create", text: "Design or adapt learning content in Hindi", href: "/create-lesson", color: "orange" },
@@ -34,7 +36,7 @@ export default function Home() {
       <section className="home-stats" aria-label="Learning resources">
         <div><i className="orange"><Icon name="book"/></i><span><strong>3</strong><b>Demo Lessons</b><small>Hindi–Santhali learning kits</small></span></div>
         <div><i className="green"><Icon name="check"/></i><span><strong>Teacher</strong><b>Review &amp; Verification</b><small>Make every lesson classroom-ready</small></span></div>
-        <div><i className="blue"><Icon name="students"/></i><span><strong>3</strong><b>Grade Levels</b><small>Foundational learning content</small></span></div>
+        <div><i className="blue"><Icon name="students"/></i><span><strong>{SCHOOL_CLASSES.length}</strong><b>Grade Levels</b><small>Classes 1–5</small></span></div>
         <div><i className="orange"><Icon name="globe"/></i><span><strong>2</strong><b>Languages</b><small>Hindi <em>→</em> Santhali</small></span></div>
         <blockquote>“A stronger India begins with<br />a child who learns in their own language.”</blockquote>
       </section>

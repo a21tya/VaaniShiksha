@@ -2,7 +2,6 @@ import { Suspense } from "react";
 import PageContainer from "@/components/PageContainer";
 import StudentModeContent from "./student-mode-content";
 
-export const dynamic = "force-dynamic";
 
 function StudentModeFallback() {
   return (
@@ -12,18 +11,10 @@ function StudentModeFallback() {
   );
 }
 
-export default async function StudentModePage({
-  searchParams,
-}: {
-  searchParams: Promise<{ id?: string | string[] }>;
-}) {
-  const params = await searchParams;
-  const rawId = params.id;
-  const lessonId = Array.isArray(rawId) ? (rawId[0] ?? null) : (rawId ?? null);
-
+export default function StudentModePage() {
   return (
     <Suspense fallback={<StudentModeFallback />}>
-      <StudentModeContent key={lessonId ?? "default"} lessonId={lessonId} />
+      <StudentModeContent lessonId={null} />
     </Suspense>
   );
 }

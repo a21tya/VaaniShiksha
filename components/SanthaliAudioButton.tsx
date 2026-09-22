@@ -32,14 +32,18 @@ export default function SantaliAudioButton({
 
   const handlePlay = async () => {
     setError("");
-    const cached = await getAudioBlob(audioId);
-    if (cached) {
-      showAudioPlayer(cached);
-      return;
-    }
-
     setStatus("loading");
     try {
+      const cacheId = `${audioId}:${text.trim()}`;
+      const cached = await getAudioBlob(cacheId);
+      if (cached) { showAudioPlayer(cached); return; }
+      // Match the server's content hash so bundled speech also works offline.
+      const hashBuffer = await crypto.subtle.digest("SHA-256", new TextEncoder().encode("indic-parler-v1:" + text.trim()));
+      const hash = Array.from(new Uint8Array(hashBuffer)).map(byte => byte.toString(16).padStart(2, "0")).join("");
+      const bundled = await fetch(`/audio_cache/${hash}.wav`).catch(() => null);
+      if (bundled?.ok && bundled.headers.get("content-type")?.startsWith("audio/")) {
+        const blob = await bundled.blob(); await saveAudioBlob(cacheId, blob, lessonId); showAudioPlayer(blob); return;
+      }
       const response = await fetch("/api/speak-santhali", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -52,7 +56,7 @@ export default function SantaliAudioButton({
       }
 
       const blob = await response.blob();
-      await saveAudioBlob(audioId, blob, lessonId);
+      await saveAudioBlob(cacheId, blob, lessonId);
       showAudioPlayer(blob);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Audio could not be generated.");
@@ -60,6 +64,15 @@ export default function SantaliAudioButton({
       setStatus("idle");
     }
   };
+
+  async function importAudio(file?: File) {
+    if (!file) return;
+    try {
+      if (!file.type.startsWith("audio/") || file.size > 30 * 1024 * 1024) throw new Error("Choose an audio file smaller than 30 MB.");
+      await saveAudioBlob(`${audioId}:${text.trim()}`, file, lessonId);
+      showAudioPlayer(file); setError("");
+    } catch (error) { setError(error instanceof Error ? error.message : "Could not save audio."); }
+  }
 
   return (
     <div className="pt-3">
@@ -74,6 +87,8 @@ export default function SantaliAudioButton({
       <div className="mt-2 text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider pl-1">
         Saved audio plays offline · New audio uses your local voice service
       </div>
+      <details className="mt-2 text-sm"><summary>Use a teacher’s audio recording offline</summary><p>Choose a recording of this exact passage. It is saved on this device.</p><input type="file" accept="audio/*" onChange={event => { void importAudio(event.target.files?.[0]); event.target.value = ""; }}/></details>
+      {audioUrl && <a href={audioUrl} download="santhali-recording.wav" className="text-sm underline">Download this audio</a>}
       {error && <p role="alert" className="mt-2 text-xs font-semibold text-red-700">{error}</p>}
       {audioUrl && (
         <audio controls autoPlay src={audioUrl} className="mt-3 w-full">
