@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "./refresh.css";
 import OfflineNavigation from "@/components/OfflineNavigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -29,10 +30,12 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       data-scroll-behavior="smooth"
       className="h-full antialiased"
     >
-      <body className="min-h-full flex flex-col bg-[#fcfbf9] text-slate-800">
+      <head><script dangerouslySetInnerHTML={{ __html: `(function(){var t;try{t=localStorage.getItem('vaani-theme')}catch(e){}if(t!=='dark'&&t!=='light')t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.dataset.theme=t;document.documentElement.style.colorScheme=t})()` }} /></head>
+      <body className="min-h-full flex flex-col">
         <OfflineNavigation />
         <Navbar />
         {children}
