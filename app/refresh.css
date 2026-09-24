@@ -53,14 +53,14 @@ html[data-theme="dark"] :is([class*="text-amber-9"],[class*="text-orange-9"],[cl
 html[data-theme="dark"] [class*="bg-white/"]{background:var(--surface)!important}
 html[data-theme="dark"] :is(.learning-navigation,.read-book,.word-example,.word-preview blockquote,.dictionary-invitation>a){border-color:var(--border)}
 /* Keep the flag opaque; only the surrounding heritage illustration may fade. */
-.page-heading .heading-heritage { opacity: 1; }
+.workspace-page .page-heading .heading-heritage { opacity: 1; }
 @media (max-width: 800px) {
-  .page-heading .heading-heritage > svg:first-child { opacity: .33; }
-  .page-heading .heading-heritage > span { opacity: .6; }
+  .workspace-page .page-heading .heading-heritage > svg:first-child { opacity: .33; }
+  .workspace-page .page-heading .heading-heritage > span { opacity: .6; }
 }
 @media (max-width: 540px) {
-  .page-heading .heading-heritage { position: static; width: auto; height: auto; }
-  .page-heading .heading-heritage > svg:first-child,
-  .page-heading .heading-heritage > span { display: none; }
-  .page-heading .heading-heritage .indian-flag { margin: 16px 0 0; width: 48px; }
+  .workspace-page .page-heading .heading-heritage { position: static; width: auto; height: auto; }
+  .workspace-page .page-heading .heading-heritage > svg:first-child,
+  .workspace-page .page-heading .heading-heritage > span { display: none; }
+  .workspace-page .page-heading .heading-heritage .indian-flag { margin: 16px 0 0; width: 48px; }
 }
