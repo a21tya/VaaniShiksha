@@ -1,0 +1,6 @@
+# Speech models run on the user's device, not in Vercel's Next.js build.
+tts_service/
+.ncert-cache/
+test-results/
+playwright-report/
+scratch/
